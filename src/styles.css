@@ -1,0 +1,84 @@
+html,body{margin:0;padding:0;background:#EFEAED;font-family:'Barlow',system-ui,sans-serif;color:#1D1A1C;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#E4007C;text-decoration:none}a:hover{color:#A3005A;text-decoration:underline}
+input,select,textarea,button{font-family:inherit}
+
+/* Focus: ring for keyboard navigation and on every active form field */
+:focus{outline:none}
+:focus-visible,input:focus,select:focus,textarea:focus{outline:2px solid #E4007C;outline-offset:2px}
+@keyframes sofspin{to{transform:rotate(360deg)}}
+@keyframes sofpulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes sofscan{0%{top:8%}50%{top:88%}100%{top:8%}}
+
+/* ---------- Responsive layer (overrides the design's inline styles) ---------- */
+.mob-only{display:none !important}
+@media (max-width: 899px){
+  .mob-only{display:flex !important}
+  .desk-only{display:none !important}
+  .r-pad{padding-left:16px !important;padding-right:16px !important}
+  .r-badgegap{padding-right:0 !important}
+  .r-stack{grid-template-columns:minmax(0,1fr) !important}
+  .r-card{overflow-x:auto !important;-webkit-overflow-scrolling:touch}
+  .r-row{min-width:820px}
+  .r-scrollx{overflow-x:auto;max-width:100%;padding-bottom:4px}
+  .r-week{grid-template-columns:repeat(7,minmax(150px,1fr)) !important;overflow-x:auto;padding-bottom:6px}
+
+  /* Admin: sidebar becomes an off-canvas drawer */
+  .adm-aside{position:fixed !important;left:0;top:0;bottom:0;z-index:40;height:100dvh !important;transform:translateX(-100%);transition:transform .2s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
+  .adm-aside.open{transform:none}
+  .adm-backdrop{position:fixed;inset:0;z-index:39;background:rgba(29,26,28,.45)}
+}
+@media (max-width: 599px){
+  .demo-badge{display:none !important}
+  .demo-bar button{padding:0 10px !important;font-size:12px !important}
+}
+@media (max-width: 899px){
+  .r-first{order:-1;position:static !important;grid-column:auto !important;grid-row:auto !important}
+  .r-auto{grid-column:auto !important;grid-row:auto !important}
+}
+@media (max-width: 899px){
+  .r-shrink{flex:1 1 100% !important;min-width:0 !important;max-width:100%;padding:12px !important}
+}
+@media (max-width: 599px){
+  .demo-tab{padding:10px 4px !important;opacity:.9}
+  .demo-tab-label{display:none !important}
+}
+
+/* Tables -> cards on phones (tables stay on tablet/desktop) */
+.cards-only{display:none !important}
+@media (max-width: 767px){
+  .r-row{display:none !important}
+  .cards-only{display:flex !important}
+}
+@media (max-width: 599px){
+  .r-caja{grid-template-columns:32px minmax(0,1fr) auto !important;row-gap:2px !important}
+  .r-caja>:nth-child(1){grid-row:1 / span 2}
+  .r-caja>:nth-child(2){grid-column:2;grid-row:1}
+  .r-caja>:nth-child(3){grid-column:2;grid-row:2;font-size:12.5px;font-weight:500;color:#6B6468}
+  .r-caja>:nth-child(4){grid-column:3;grid-row:1 / span 2;align-self:center}
+}
+
+/* Demo switcher on phones: grid instead of a single overflowing row */
+@media (max-width: 599px){
+  .demo-bar{display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr));width:calc(100vw - 24px) !important;border-radius:20px !important;gap:4px !important}
+  .demo-bar > span{display:none !important}
+  .demo-bar > button:nth-last-child(2){grid-column:1 / 4}
+  .demo-bar > button:last-child{grid-column:4;justify-self:end;width:40px !important;height:40px !important;padding:0 !important;font-size:20px !important}
+  .demo-bar button{min-width:0;white-space:nowrap}
+  .demo-panel{width:100% !important;max-height:calc(100dvh - 190px) !important}
+}
+
+/* Ventas header on phones: logo + branch on one row, seller as avatar only */
+@media (max-width: 599px){
+  .vh-row{flex-wrap:nowrap !important;gap:10px !important}
+  .vh-logo{height:34px !important;flex:none}
+  .vh-branch{flex:1;min-width:0;padding-left:10px !important}
+  .vh-branch > span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vh-branch > span:nth-child(2){font-size:18px !important}
+  .vh-sub{font-size:11px !important}
+  .vh-user{display:none !important}
+  .vh-row > .r-badgegap{flex:none}
+}
+
+/* Public site: scroll area is a column so the footer sits at the bottom on short screens */
+.pub-scroll > *{flex-shrink:0;width:100%;min-width:0}

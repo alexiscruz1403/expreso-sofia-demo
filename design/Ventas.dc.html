@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800;900&family=Kaushan+Script&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet">
+  <script src="sofia-data.js"></script>
+</helmet>
+<div style="min-height:100vh;background:#F7F4F5;font-family:'Barlow',system-ui,sans-serif;color:#1D1A1C">
+  <header style="background:#fff;border-bottom:1px solid #EFE8EC;position:sticky;top:0;z-index:5">
+    <div style="padding:10px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <img src="assets/logo.png" alt="Expreso Sofía" style="height:44px">
+      <div style="display:flex;flex-direction:column;border-left:1px solid #EFE8EC;padding-left:18px">
+        <span style="font:700 11px 'Barlow',sans-serif;letter-spacing:.12em;color:#E4007C">SUCURSAL</span>
+        <span style="font:800 20px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase">Salta Capital</span>
+        <span style="font:500 12px 'Barlow',sans-serif;color:#6B6468">Terminal de Ómnibus · boleterías 07 y 13</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;padding-right:180px">
+        <div style="text-align:right"><div style="font:700 14px 'Barlow',sans-serif">Daiana Tolaba</div><div style="font:500 12px 'Barlow',sans-serif;color:#6B6468">Vendedora · Vie 16 oct · 20:30</div></div>
+        <span style="width:38px;height:38px;border-radius:50%;background:#E4007C;color:#fff;display:flex;align-items:center;justify-content:center;font:800 14px 'Barlow',sans-serif">DT</span>
+      </div>
+    </div>
+    <nav style="padding:0 20px;display:flex;gap:4px;overflow-x:auto">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <button onClick="{{ t.on }}" style="border:none;background:none;cursor:pointer;padding:12px 14px;font:700 14px 'Barlow',sans-serif;color:{{ t.fg }};border-bottom:3px solid {{ t.bd }};display:flex;align-items:center;gap:6px;white-space:nowrap"><span style="font-family:'Material Symbols Rounded';font-size:19px">{{ t.icon }}</span>{{ t.label }}</button>
+      </sc-for>
+    </nav>
+  </header>
+
+  <div style="padding:24px 28px 110px;max-width:1360px;display:flex;flex-direction:column;gap:18px">
+
+    <!-- NUEVA VENTA -->
+    <sc-if value="{{ tab.venta }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ sale.done }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <dc-import name="Boleto" t="{{ sale.ticket }}" hint-size="400px,720px" style="flex:0 0 400px"></dc-import>
+          <div style="flex:1 1 300px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="width:44px;height:44px;border-radius:50%;background:#DDF3E8;color:#1F9D6B;display:flex;align-items:center;justify-content:center;font-family:'Material Symbols Rounded';font-size:26px">check</span><div><div style="font:800 26px/1 'Barlow Condensed',sans-serif;text-transform:uppercase">Pasaje emitido</div><div style="font:500 13px 'Barlow',sans-serif;color:#6B6468">{{ sale.doneSub }}</div></div></div>
+            <sc-if value="{{ sale.hasChange }}" hint-placeholder-val="{{ false }}"><div style="background:#FFF4DB;color:#8A5A00;border-radius:12px;padding:12px;font:700 16px 'Barlow',sans-serif">Vuelto a entregar: {{ sale.change }}</div></sc-if>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button onClick="{{ sale.print }}" style="height:46px;padding:0 18px;border:none;border-radius:999px;background:linear-gradient(135deg,#E4007C,#FF4FA0);color:#fff;font:700 14px 'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:19px">print</span>Imprimir boleto</button>
+              <button onClick="{{ sale.wa }}" style="height:46px;padding:0 18px;border:none;border-radius:999px;background:#25D366;color:#0B3B1E;font:700 14px 'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:19px">send</span>Enviar por WhatsApp</button>
+              <button onClick="{{ sale.reset }}" style="height:46px;padding:0 18px;border:1.5px solid #E2D9DE;border-radius:999px;background:#fff;color:#1D1A1C;font:700 14px 'Barlow',sans-serif;cursor:pointer">Nueva venta</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sale.form }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:18px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="font:800 18px 'Barlow Condensed',sans-serif;text-transform:uppercase">1 · Viaje</div>
+              <div style="display:flex;background:#F3EEF1;border-radius:12px;padding:4px;gap:4px">
+                <sc-for list="{{ sale.lines }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.on }}" style="flex:1;height:38px;border:none;border-radius:9px;cursor:pointer;font:700 13px 'Barlow',sans-serif;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+              </div>
+              <div style="display:flex;background:#F3EEF1;border-radius:12px;padding:4px;gap:4px">
+                <sc-for list="{{ sale.dirs }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.on }}" style="flex:1;height:38px;border:none;border-radius:9px;cursor:pointer;font:700 13px 'Barlow',sans-serif;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+                <sc-for list="{{ sale.days }}" as="d" hint-placeholder-count="7"><button onClick="{{ d.on }}" disabled="{{ d.dis }}" style="height:54px;border-radius:10px;border:1.5px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.fg }};cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:{{ d.op }};padding:0"><span style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase">{{ d.dow }}</span><span style="font:800 18px 'Barlow Condensed',sans-serif">{{ d.num }}</span></button></sc-for>
+              </div>
+              <sc-if value="{{ sale.hasTrip }}" hint-placeholder-val="{{ true }}">
+                <div style="background:#F8F5F6;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:3px">
+                  <div style="font:800 18px 'Barlow Condensed',sans-serif;text-transform:uppercase">{{ sale.tripRoute }}</div>
+                  <div style="font:600 13px 'Barlow',sans-serif">{{ sale.tripWhen }}</div>
+                  <div style="font:500 12.5px 'Barlow',sans-serif;color:#6B6468">{{ sale.tripAvail }}</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ sale.noTrip }}" hint-placeholder-val="{{ false }}"><div style="background:#FFF4DB;color:#8A5A00;border-radius:12px;padding:12px;font:600 13px 'Barlow',sans-serif">{{ sale.noTripText }}</div></sc-if>
+            </div>
+            <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px">
+              <div style="font:800 18px 'Barlow Condensed',sans-serif;text-transform:uppercase">3 · Pasajero y cobro</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <sc-for list="{{ sale.fields }}" as="f" hint-placeholder-count="4">
+                  <label style="display:flex;flex-direction:column;gap:4px;font:600 12px 'Barlow',sans-serif;color:#6B6468">{{ f.label }}<input value="{{ f.value }}" onChange="{{ f.on }}" placeholder="{{ f.ph }}" style="height:42px;border:1.5px solid {{ f.bd }};border-radius:10px;padding:0 10px;font:600 14px 'Barlow',sans-serif;color:#1D1A1C;min-width:0"></label>
+                </sc-for>
+              </div>
+              <label style="display:flex;flex-direction:column;gap:4px;font:600 12px 'Barlow',sans-serif;color:#6B6468">{{ sale.stopLabel }}<select value="{{ sale.stop }}" onChange="{{ sale.onStop }}" style="height:42px;border:1.5px solid #E2D9DE;border-radius:10px;padding:0 10px;font:600 14px 'Barlow',sans-serif;background:#fff;color:#1D1A1C"><sc-for list="{{ sale.stops }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+              <div style="font:600 12px 'Barlow',sans-serif;color:#6B6468">Tipo de pasaje</div>
+              <div style="display:flex;gap:6px"><sc-for list="{{ sale.types }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.on }}" style="flex:1;height:38px;border-radius:10px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font:700 13px 'Barlow',sans-serif;cursor:pointer">{{ o.label }}</button></sc-for></div>
+              <div style="font:600 12px 'Barlow',sans-serif;color:#6B6468">Canal</div>
+              <div style="display:flex;gap:6px"><sc-for list="{{ sale.channels }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.on }}" style="flex:1;height:38px;border-radius:10px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font:700 13px 'Barlow',sans-serif;cursor:pointer">{{ o.label }}</button></sc-for></div>
+              <sc-if value="{{ sale.showPay }}" hint-placeholder-val="{{ true }}">
+                <div style="font:600 12px 'Barlow',sans-serif;color:#6B6468">Medio de cobro</div>
+                <div style="display:flex;gap:6px"><sc-for list="{{ sale.methods }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:44px;border-radius:10px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font:700 12.5px 'Barlow',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-family:'Material Symbols Rounded';font-size:18px">{{ o.icon }}</span>{{ o.label }}</button></sc-for></div>
+                <sc-if value="{{ sale.isCash }}" hint-placeholder-val="{{ true }}">
+                  <label style="display:flex;flex-direction:column;gap:4px;font:600 12px 'Barlow',sans-serif;color:#6B6468">Recibido en efectivo<input value="{{ sale.received }}" onChange="{{ sale.onReceived }}" inputmode="numeric" placeholder="20000" style="height:42px;border:1.5px solid #E2D9DE;border-radius:10px;padding:0 10px;font:700 15px 'Barlow',sans-serif;color:#1D1A1C"></label>
+                </sc-if>
+                <sc-if value="{{ sale.isQr }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:12px;align-items:center;background:#E6F6FD;border-radius:12px;padding:10px"><div style="width:72px;height:72px;background:#fff;border-radius:8px;display:grid;grid-template-columns:repeat(25,1fr);padding:4px"><sc-for list="{{ sale.qr }}" as="q" hint-placeholder-count="0"><div style="background:{{ q }}"></div></sc-for></div><div style="font:600 13px/1.4 'Barlow',sans-serif;color:#005A80">El pasajero escanea el QR de MercadoPago de la boletería. Confirmá cuando veas el pago acreditado.</div></div>
+                </sc-if>
+              </sc-if>
+              <sc-if value="{{ sale.isCud }}" hint-placeholder-val="{{ false }}"><div style="background:#EAF1FD;color:#1F4E9E;border-radius:12px;padding:10px;font:600 12.5px/1.45 'Barlow',sans-serif">Cortesía CUD: verificá el certificado original y el DNI del titular antes de emitir. Precio $0.</div></sc-if>
+              <sc-if value="{{ sale.err }}" hint-placeholder-val="{{ false }}"><div style="background:#FBE3E3;color:#B22A2A;border-radius:10px;padding:10px;font:600 13px 'Barlow',sans-serif">{{ sale.err }}</div></sc-if>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #F3EDF0;padding-top:10px"><span style="font:700 14px 'Barlow',sans-serif">Total</span><span style="font:900 30px 'Barlow Condensed',sans-serif;color:#E4007C">{{ sale.price }}</span></div>
+              <sc-if value="{{ sale.hasChangePreview }}" hint-placeholder-val="{{ false }}"><div style="font:700 13px 'Barlow',sans-serif;color:#8A5A00;text-align:right">Vuelto: {{ sale.changePreview }}</div></sc-if>
+              <button onClick="{{ sale.emit }}" style="height:50px;border:none;border-radius:999px;background:linear-gradient(135deg,#E4007C,#FF4FA0);color:#fff;font:800 16px 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;cursor:pointer">Cobrar y emitir pasaje</button>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div style="font:800 18px 'Barlow Condensed',sans-serif;text-transform:uppercase">2 · Asiento</div><div style="font:700 14px 'Barlow',sans-serif;color:#E4007C">{{ sale.seatLabel }}</div></div>
+            <sc-if value="{{ sale.hasTrip }}" hint-placeholder-val="{{ true }}">
+              <dc-import name="SeatMap" seats="{{ sale.seats }}" selected="{{ sale.selected }}" on-toggle="{{ sale.toggle }}" mode="buy" layout="stacked" size="38" price-semi="{{ sale.pSemi }}" price-cama="{{ sale.pCama }}" hint-size="100%,640px"></dc-import>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <!-- BUSCAR -->
+    <sc-if value="{{ tab.buscar }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <label style="flex:1 1 300px;display:flex;flex-direction:column;gap:4px;font:600 12px 'Barlow',sans-serif;color:#6B6468">Código de reserva o DNI<input value="{{ bq.q }}" onChange="{{ bq.onQ }}" placeholder="SOF-4KD72 o 32456789" style="height:46px;border:1.5px solid #E2D9DE;border-radius:12px;padding:0 12px;font:600 15px 'Barlow',sans-serif;color:#1D1A1C"></label>
+        <button onClick="{{ bq.search }}" style="height:46px;padding:0 20px;border:none;border-radius:999px;background:#1D1A1C;color:#fff;font:700 14px 'Barlow',sans-serif;cursor:pointer">Buscar</button>
+        <div style="flex-basis:100%;font:500 12.5px 'Barlow',sans-serif;color:#8A8186">Probá con SOF-4KD72, DNI 32456789 o un código comprado en el sitio.</div>
+      </div>
+      <sc-if value="{{ bq.none }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1.5px dashed #E6DEE2;border-radius:16px;padding:24px;text-align:center;font:600 14px 'Barlow',sans-serif;color:#6B6468">No encontramos pasajes con ese código o DNI.</div></sc-if>
+      <sc-for list="{{ bq.results }}" as="t" hint-placeholder-count="0">
+        <div style="background:#fff;border:2px solid {{ t.bd }};border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div style="flex:1 1 260px"><div style="font:700 12px 'Barlow',sans-serif;color:#6B6468">{{ t.code }} · {{ t.line }} · {{ t.channel }}</div><div style="font:800 20px 'Barlow Condensed',sans-serif;text-transform:uppercase">{{ t.route }} · {{ t.date }} {{ t.time }} hs</div><div style="font:500 13px 'Barlow',sans-serif">{{ t.name }} · DNI {{ t.dni }} · Asiento {{ t.seat }} ({{ t.cls }}) · {{ t.price }}</div></div>
+          <span style="border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif;background:{{ t.sBg }};color:{{ t.sFg }}">{{ t.sLabel }}</span>
+          <sc-if value="{{ t.canAct }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:6px"><button onClick="{{ t.reprog }}" style="height:38px;padding:0 14px;border:1.5px solid #E4007C;border-radius:999px;background:#fff;color:#E4007C;font:700 13px 'Barlow',sans-serif;cursor:pointer">Reprogramar</button><button onClick="{{ t.cancel }}" style="height:38px;padding:0 14px;border:1.5px solid #E2D9DE;border-radius:999px;background:#fff;color:#B22A2A;font:700 13px 'Barlow',sans-serif;cursor:pointer">Cancelar</button></div>
+          </sc-if>
+        </div>
+      </sc-for>
+      <sc-if value="{{ act.rp }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font:800 20px 'Barlow Condensed',sans-serif;text-transform:uppercase">Reprogramar · {{ act.label }}</div><button onClick="{{ act.close }}" style="border:none;background:none;cursor:pointer;font:700 13px 'Barlow',sans-serif;color:#6B6468">Cerrar</button></div>
+          <sc-if value="{{ act.blocked }}" hint-placeholder-val="{{ false }}"><div style="background:#FFF4DB;color:#8A5A00;border-radius:12px;padding:12px;font:600 13.5px 'Barlow',sans-serif">Faltan menos de 24 h para el viaje: fuera de política. Solo un administrador puede autorizar el cambio.</div></sc-if>
+          <sc-if value="{{ act.open }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:repeat(7,90px);gap:6px">
+              <sc-for list="{{ act.days }}" as="d" hint-placeholder-count="7"><button onClick="{{ d.on }}" disabled="{{ d.dis }}" style="height:54px;border-radius:10px;border:1.5px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.fg }};cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:{{ d.op }}"><span style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase">{{ d.dow }}</span><span style="font:800 18px 'Barlow Condensed',sans-serif">{{ d.num }}</span></button></sc-for>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+              <sc-if value="{{ act.hasTrip }}" hint-placeholder-val="{{ false }}"><dc-import name="SeatMap" seats="{{ act.seats }}" selected="{{ act.selected }}" on-toggle="{{ act.toggle }}" mode="buy" layout="stacked" size="34" hint-size="460px,600px"></dc-import></sc-if>
+              <div style="flex:1 1 260px;display:flex;flex-direction:column;gap:8px;font:500 14px 'Barlow',sans-serif">
+                <div style="font:700 14px 'Barlow',sans-serif">{{ act.newTrip }}</div>
+                <div style="display:flex;justify-content:space-between"><span>Cargo por reprogramación</span><strong>{{ act.fee }}</strong></div>
+                <div style="display:flex;justify-content:space-between"><span>Diferencia de tarifa</span><strong>{{ act.diff }}</strong></div>
+                <button onClick="{{ act.toggleWaive }}" style="display:flex;align-items:center;gap:8px;border:none;background:none;cursor:pointer;padding:0;font:600 13px 'Barlow',sans-serif;color:#1D1A1C"><span style="width:20px;height:20px;border-radius:5px;border:2px solid #E4007C;background:{{ act.waiveBg }};color:#fff;font-family:'Material Symbols Rounded';font-size:15px;display:flex;align-items:center;justify-content:center">{{ act.waiveMark }}</span>Sin cargo (excepción autorizada)</button>
+                <div style="display:flex;justify-content:space-between;border-top:1px solid #F3EDF0;padding-top:8px;align-items:baseline"><strong>A cobrar</strong><strong style="font:900 26px 'Barlow Condensed',sans-serif;color:#E4007C">{{ act.total }}</strong></div>
+                <button onClick="{{ act.confirm }}" disabled="{{ act.notReady }}" style="height:46px;border:none;border-radius:999px;background:{{ act.btnBg }};color:#fff;font:800 15px 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;cursor:pointer">Confirmar y emitir nuevo boleto</button>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <sc-if value="{{ act.cx }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;max-width:520px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font:800 20px 'Barlow Condensed',sans-serif;text-transform:uppercase">Cancelar · {{ act.label }}</div><button onClick="{{ act.close }}" style="border:none;background:none;cursor:pointer;font:700 13px 'Barlow',sans-serif;color:#6B6468">Cerrar</button></div>
+          <div style="display:flex;justify-content:space-between;font:500 14px 'Barlow',sans-serif"><span>Pagó</span><strong>{{ act.paid }}</strong></div>
+          <div style="display:flex;justify-content:space-between;font:500 14px 'Barlow',sans-serif"><span>Retención ({{ act.pctLabel }})</span><strong>{{ act.cfee }}</strong></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #F3EDF0;padding-top:8px"><strong>Reintegro</strong><strong style="font:900 26px 'Barlow Condensed',sans-serif;color:#147A52">{{ act.refund }}</strong></div>
+          <div style="font:500 12.5px 'Barlow',sans-serif;color:#6B6468">{{ act.refundWhere }}</div>
+          <sc-if value="{{ act.cxBlocked }}" hint-placeholder-val="{{ false }}"><div style="background:#FFF4DB;color:#8A5A00;border-radius:12px;padding:10px;font:600 13px 'Barlow',sans-serif">Menos de 24 h: sin reintegro según política.</div></sc-if>
+          <button onClick="{{ act.confirmCx }}" style="height:46px;border:none;border-radius:999px;background:#D33A3A;color:#fff;font:800 15px 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;cursor:pointer">Confirmar cancelación</button>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <!-- VIAJES -->
+    <sc-if value="{{ tab.viajes }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:16px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ vtrips }}" as="t" hint-placeholder-count="6">
+            <button onClick="{{ t.on }}" style="background:#fff;border:2px solid {{ t.bd }};border-radius:14px;padding:12px 14px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;opacity:{{ t.op }}">
+              <div style="display:flex;justify-content:space-between;gap:8px"><span style="font:800 17px 'Barlow Condensed',sans-serif;text-transform:uppercase;color:#1D1A1C">{{ t.route }}</span><span style="font:700 12px 'Barlow',sans-serif;color:#6B6468">{{ t.date }} {{ t.time }}</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="flex:1;height:7px;border-radius:7px;background:#F1ECEF;overflow:hidden"><span style="display:block;height:100%;width:{{ t.pct }}%;background:#E4007C"></span></span><span style="font:700 12px 'Barlow',sans-serif;color:#1D1A1C">{{ t.occ }}</span></div>
+            </button>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><div style="font:800 22px 'Barlow Condensed',sans-serif;text-transform:uppercase">{{ vt.route }}</div><div style="font:500 13px 'Barlow',sans-serif;color:#6B6468">{{ vt.when }} · Coche N° {{ vt.car }}</div></div><div style="font:700 14px 'Barlow',sans-serif">{{ vt.counts }}</div></div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+            <dc-import name="SeatMap" seats="{{ vt.seats }}" mode="view" layout="stacked" size="30" hint-size="420px,560px"></dc-import>
+            <div style="flex:1 1 260px;display:flex;flex-direction:column;max-height:560px;overflow:auto">
+              <sc-for list="{{ vt.pax }}" as="p" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:36px 1fr auto;gap:8px;padding:7px 4px;border-bottom:1px solid #F3EDF0;font:500 13px 'Barlow',sans-serif"><strong style="color:#E4007C">{{ p.seat }}</strong><span>{{ p.name }}</span><span style="color:#6B6468">{{ p.stop }}</span></div></sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- HISTORIAL -->
+    <sc-if value="{{ tab.historial }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:6px"><sc-for list="{{ hist.tabs }}" as="h" hint-placeholder-count="2"><button onClick="{{ h.on }}" style="height:36px;padding:0 14px;border-radius:999px;border:1.5px solid {{ h.bd }};background:{{ h.bg }};color:{{ h.fg }};font:700 13px 'Barlow',sans-serif;cursor:pointer">{{ h.label }}</button></sc-for></div>
+      <sc-if value="{{ hist.isPay }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:110px 100px 1.4fr 1fr 1fr 1fr 100px;gap:10px;padding:10px 18px;background:#FAF8F9;font:700 11px 'Barlow',sans-serif;letter-spacing:.08em;color:#8A8186;text-transform:uppercase"><span>Fecha</span><span>Código</span><span>Pasajero</span><span>Viaje</span><span>Canal</span><span>Medio</span><span style="text-align:right">Monto</span></div>
+          <sc-for list="{{ hist.pays }}" as="p" hint-placeholder-count="8"><div style="display:grid;grid-template-columns:110px 100px 1.4fr 1fr 1fr 1fr 100px;gap:10px;padding:10px 18px;border-top:1px solid #F3EDF0;font:500 13.5px 'Barlow',sans-serif;background:{{ p.bg }}"><span style="color:#6B6468">{{ p.date }}</span><strong>{{ p.code }}</strong><span>{{ p.payer }}</span><span>{{ p.trip }}</span><span>{{ p.channel }} · {{ p.seller }}</span><span style="color:#6B6468">{{ p.method }}</span><strong style="text-align:right">{{ p.amount }}</strong></div></sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hist.isChg }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:100px 100px 1.2fr 1fr 1.2fr 1.2fr 1.3fr 90px 90px;gap:10px;padding:10px 18px;background:#FAF8F9;font:700 11px 'Barlow',sans-serif;letter-spacing:.06em;color:#8A8186;text-transform:uppercase"><span>Fecha</span><span>Código</span><span>Pasajero</span><span>Tipo</span><span>De</span><span>A</span><span>Motivo</span><span>Cargo</span><span>Reintegro</span></div>
+          <sc-for list="{{ hist.chg }}" as="c" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:100px 100px 1.2fr 1fr 1.2fr 1.2fr 1.3fr 90px 90px;gap:10px;padding:10px 18px;border-top:1px solid #F3EDF0;font:500 13px 'Barlow',sans-serif"><span style="color:#6B6468">{{ c.date }}</span><strong>{{ c.code }}</strong><span>{{ c.pax }}</span><span>{{ c.type }}</span><span>{{ c.from }}</span><span>{{ c.to }}</span><span style="color:#6B6468">{{ c.reason }}</span><span>{{ c.fee }}</span><span style="color:#147A52;font-weight:700">{{ c.refund }}</span></div></sc-for>
+          <sc-if value="{{ hist.chgEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:24px;text-align:center;font:600 14px 'Barlow',sans-serif;color:#8A8186">Sin movimientos en esta sucursal.</div></sc-if>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <!-- CAJA -->
+    <sc-if value="{{ tab.caja }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);gap:16px;align-items:start">
+        <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:800 22px 'Barlow Condensed',sans-serif;text-transform:uppercase">Cierre de caja · Viernes 16/10</div><span style="border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif;background:{{ caja.sBg }};color:{{ caja.sFg }}">{{ caja.state }}</span></div>
+          <div style="font:500 13px 'Barlow',sans-serif;color:#6B6468">Daiana Tolaba · Salta Capital · turno 13:00 a 21:00</div>
+          <sc-for list="{{ caja.rows }}" as="r" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:36px 1fr 90px 120px;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #F3EDF0;font:500 14px 'Barlow',sans-serif"><span style="width:32px;height:32px;border-radius:50%;background:#FDE6F2;color:#E4007C;display:flex;align-items:center;justify-content:center;font-family:'Material Symbols Rounded';font-size:18px">{{ r.icon }}</span><span style="font-weight:700">{{ r.label }}</span><span style="color:#6B6468">{{ r.count }}</span><strong style="text-align:right;font-size:16px">{{ r.amount }}</strong></div>
+          </sc-for>
+          <div style="display:grid;grid-template-columns:36px 1fr 90px 120px;gap:10px;align-items:center;padding:12px 0;border-top:2px solid #1D1A1C;font:700 15px 'Barlow',sans-serif"><span></span><span>Total vendido</span><span>{{ caja.count }}</span><strong style="text-align:right;font:900 24px 'Barlow Condensed',sans-serif;color:#E4007C">{{ caja.total }}</strong></div>
+        </div>
+        <div style="background:#fff;border:1px solid #EFE8EC;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px">
+          <div style="font:800 18px 'Barlow Condensed',sans-serif;text-transform:uppercase">Arqueo de efectivo</div>
+          <div style="display:flex;justify-content:space-between;font:500 14px 'Barlow',sans-serif"><span>Fondo inicial</span><strong>$20.000</strong></div>
+          <div style="display:flex;justify-content:space-between;font:500 14px 'Barlow',sans-serif"><span>Ventas en efectivo</span><strong>{{ caja.cash }}</strong></div>
+          <div style="display:flex;justify-content:space-between;font:500 14px 'Barlow',sans-serif"><span>Reintegros en efectivo</span><strong>{{ caja.refunds }}</strong></div>
+          <div style="display:flex;justify-content:space-between;font:700 15px 'Barlow',sans-serif;border-top:1px solid #F3EDF0;padding-top:8px"><span>Esperado en caja</span><strong>{{ caja.expected }}</strong></div>
+          <label style="display:flex;flex-direction:column;gap:4px;font:600 12px 'Barlow',sans-serif;color:#6B6468">Efectivo contado<input value="{{ caja.counted }}" onChange="{{ caja.onCounted }}" inputmode="numeric" disabled="{{ caja.closed }}" style="height:46px;border:1.5px solid #E2D9DE;border-radius:12px;padding:0 12px;font:700 16px 'Barlow',sans-serif;color:#1D1A1C"></label>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-radius:12px;padding:10px 12px;background:{{ caja.diffBg }};color:{{ caja.diffFg }};font:700 14px 'Barlow',sans-serif"><span>Diferencia</span><span style="font:900 22px 'Barlow Condensed',sans-serif">{{ caja.diff }}</span></div>
+          <sc-if value="{{ caja.open }}" hint-placeholder-val="{{ true }}"><button onClick="{{ caja.close }}" style="height:50px;border:none;border-radius:999px;background:linear-gradient(135deg,#E4007C,#FF4FA0);color:#fff;font:800 16px 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;cursor:pointer">Cerrar caja</button></sc-if>
+          <sc-if value="{{ caja.closed }}" hint-placeholder-val="{{ false }}"><div style="background:#DDF3E8;color:#147A52;border-radius:12px;padding:10px;font:700 13px 'Barlow',sans-serif;text-align:center">Caja cerrada a las 20:45 por Daiana Tolaba</div></sc-if>
+          <button onClick="{{ caja.print }}" style="height:44px;border:1.5px solid #E2D9DE;border-radius:999px;background:#fff;color:#1D1A1C;font:700 14px 'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:18px">print</span>Imprimir resumen</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;left:50%;top:120px;transform:translateX(-50%);z-index:60;background:#1D1A1C;color:#fff;border-radius:999px;padding:10px 18px;font:600 13px 'Barlow',sans-serif;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)">{{ toast }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const BR = 'Salta Capital', SELLER = 'Daiana Tolaba';
+class Component extends DCLogic {
+  state = { tab: 'venta', L: 'T', dir: 'vuelta', date: '2026-10-17', seat: null, p: { nombre: '', apellido: '', dni: '', wa: '' }, stop: null, type: 'normal', channel: 'Mostrador', method: 'Efectivo', received: '', err: '', done: null, q: '', searched: null, act: null, rpDate: null, rpSeat: null, waive: false, vtrip: null, hist: 'pay', counted: '', toast: '' };
+  componentDidMount() { const go = () => { if (window.SD) { this._u = SD.subscribe(() => this.forceUpdate()); this.forceUpdate(); } else this._t = setTimeout(go, 40); }; go(); }
+  componentWillUnmount() { this._u && this._u(); clearTimeout(this._t); }
+  toast(m) { this.setState({ toast: m }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2600); }
+  renderVals() {
+    const SD = window.SD; if (!SD) return { tab: { venta: true }, sale: { form: true }, act: {}, caja: {}, hist: {}, vt: {} };
+    const s = this.state, st = SD.get(), money = SD.money, NOW = SD.NOW;
+    const tabs = [['venta', 'add_card', 'Nueva venta'], ['buscar', 'manage_search', 'Reprogramar / cancelar'], ['viajes', 'directions_bus', 'Viajes'], ['historial', 'receipt_long', 'Historial'], ['caja', 'point_of_sale', 'Cierre de caja']].map(([k, icon, label]) => ({ icon, label, fg: s.tab === k ? '#E4007C' : '#4A4447', bd: s.tab === k ? '#E4007C' : 'transparent', on: () => this.setState({ tab: k }) }));
+    const tab = {}; ['venta', 'buscar', 'viajes', 'historial', 'caja'].forEach(k => tab[k] = s.tab === k);
+    const pill = (on) => ({ bg: on ? '#fff' : 'transparent', fg: on ? '#E4007C' : '#6B6468' });
+    const chip = (on) => ({ bg: on ? '#1D1A1C' : '#fff', fg: on ? '#fff' : '#1D1A1C', bd: on ? '#1D1A1C' : '#E2D9DE' });
+    const dayList = (cur, has, on) => Array.from({ length: 7 }, (_, i) => { const d = SD.addDays(SD.TODAY, i); const dt = SD.parse(d); const ok = has(d); const sel = d === cur; return { dow: SD.DOWS[dt.getDay()], num: dt.getDate(), dis: !ok, op: ok ? 1 : .4, bg: sel ? '#E4007C' : '#fff', fg: sel ? '#fff' : '#1D1A1C', bd: sel ? '#E4007C' : '#EDE5E9', on: () => ok && on(d) }; });
+    // sale
+    const tripFor = (L, dir, d) => SD.tripsOn(d).find(t => t.line === L && t.dir === dir && !t.past && !t.cancelled);
+    const trip = tripFor(s.L, s.dir, s.date);
+    const stops = SD.stopsOf(s.L, s.dir);
+    const stop = s.stop && stops.includes(s.stop) ? s.stop : (s.dir === 'ida' ? stops[0] : stops[stops.length - 1]);
+    const isCud = s.type === 'cud';
+    const price = trip && s.seat ? (isCud ? 0 : st.fares[s.L][s.seat.cls].ida) : 0;
+    const recv = parseInt(String(s.received).replace(/\D/g, ''), 10) || 0;
+    const setP = (k, v) => this.setState({ p: Object.assign({}, s.p, { [k]: v }), err: '' });
+    const resetSale = () => this.setState({ done: null, seat: null, p: { nombre: '', apellido: '', dni: '', wa: '' }, type: 'normal', received: '', err: '' });
+    const doneT = s.done ? st.purchases.find(p => p.id === s.done.id) : null;
+    const sale = {
+      done: !!doneT, form: !doneT, ticket: doneT ? SD.view(doneT) : {}, doneSub: doneT ? doneT.code + ' · ' + doneT.method + ' · ' + money(doneT.price) : '', hasChange: !!(s.done && s.done.change > 0), change: s.done ? money(s.done.change) : '',
+      print: () => this.toast('Enviando boleto a la impresora térmica…'), wa: () => this.toast('Boleto enviado por WhatsApp al ' + (doneT && doneT.wa || 'pasajero')), reset: resetSale,
+      lines: [['T', 'Línea Tartagal'], ['O', 'Línea Orán']].map(([k, label]) => Object.assign({ label, on: () => this.setState({ L: k, seat: null, stop: null }) }, pill(s.L === k))),
+      dirs: [['vuelta', 'Desde Salta'], ['ida', 'Hacia Salta']].map(([k, label]) => Object.assign({ label, on: () => this.setState({ dir: k, seat: null, stop: null }) }, pill(s.dir === k))),
+      days: dayList(s.date, d => !!tripFor(s.L, s.dir, d), d => this.setState({ date: d, seat: null })),
+      hasTrip: !!trip, noTrip: !trip, noTripText: 'No hay viaje disponible para esa fecha.',
+      tripRoute: trip ? trip.route + ' · Coche N° ' + trip.car : '', tripWhen: trip ? SD.when(trip, stop).full : '', tripAvail: trip ? (a => 'Semicama: ' + a.semi + ' libres · Cama: ' + a.cama + ' libres · CUD: ' + a.cud)(SD.avail(trip)) : '',
+      seats: trip ? SD.seatsFor(trip) : [], selected: s.seat ? [s.seat.n] : [], toggle: x => this.setState({ seat: { n: x.n, cls: x.cls, cud: x.cud }, type: x.cud ? 'cud' : s.type }),
+      pSemi: money(st.fares[s.L].semi.ida), pCama: money(st.fares[s.L].cama.ida), seatLabel: s.seat ? 'Asiento ' + s.seat.n + ' · ' + (s.seat.cls === 'semi' ? 'Semicama' : 'Cama') : 'Elegí un asiento',
+      fields: [['nombre', 'Nombre', ''], ['apellido', 'Apellido', ''], ['dni', 'DNI', 'Sin puntos'], ['wa', 'WhatsApp (opcional)', '3878-…']].map(([k, label, ph]) => ({ label, ph, value: s.p[k], bd: s.err && !s.p[k] && k !== 'wa' ? '#D33A3A' : '#E2D9DE', on: e => setP(k, e.target.value) })),
+      stopLabel: s.dir === 'ida' ? 'Parada de ascenso' : 'Parada de descenso', stop, stops: stops.map(n => ({ v: n, l: n + ' · ' + SD.hm(s.dir === 'ida' ? SD.stopMin(SD.mkTrip(s.L, 'ida', s.date), n) : SD.LINES[s.L].vStops[n]) + ' hs' })), onStop: e => this.setState({ stop: e.target.value }),
+      types: [['normal', 'Normal'], ['cud', 'Cortesía CUD']].map(([k, label]) => Object.assign({ label, on: () => this.setState({ type: k }) }, chip(s.type === k))),
+      channels: [['Mostrador', 'Mostrador'], ['WhatsApp', 'Reserva por WhatsApp']].map(([k, label]) => Object.assign({ label, on: () => this.setState({ channel: k }) }, chip(s.channel === k))),
+      showPay: !isCud, methods: [['Efectivo', 'payments'], ['Transferencia', 'account_balance'], ['MercadoPago QR', 'qr_code_2']].map(([k, icon]) => Object.assign({ label: k, icon, on: () => this.setState({ method: k }) }, chip(s.method === k))),
+      isCash: s.method === 'Efectivo', isQr: s.method === 'MercadoPago QR', qr: SD.qr('mpqr-salta'), received: s.received, onReceived: e => this.setState({ received: e.target.value }), isCud,
+      price: money(price), hasChangePreview: s.method === 'Efectivo' && !isCud && recv > price, changePreview: money(recv - price), err: s.err,
+      emit: () => {
+        if (!trip) return this.setState({ err: 'Elegí un viaje.' }); if (!s.seat) return this.setState({ err: 'Elegí un asiento en el plano.' });
+        if (!s.p.nombre || !s.p.apellido || !/^\d{7,8}$/.test(String(s.p.dni).replace(/\D/g, ''))) return this.setState({ err: 'Completá nombre, apellido y DNI (7 u 8 números).' });
+        if (s.method === 'Efectivo' && !isCud && recv && recv < price) return this.setState({ err: 'El efectivo recibido no alcanza.' });
+        const r = SD.purchase({ legs: [{ tripId: trip.id, seats: [s.seat], prices: [price] }], pax: [Object.assign({}, s.p, { stop, cud: isCud })], channel: s.channel, branch: BR, seller: SELLER, method: isCud ? 'Cortesía CUD' : s.method, payStatus: 'aprobado', wa: s.p.wa, cortesia: isCud });
+        this.setState({ done: { id: r.tickets[0].id, change: s.method === 'Efectivo' && recv > price ? recv - price : 0 } });
+      }
+    };
+    // buscar
+    const res = s.searched ? SD.findTickets(s.searched) : [];
+    const stOf = t => { const tr = SD.getTrip(t.tripId); if (t.status !== 'activo') return [t.status === 'cancelado' ? 'Cancelado' : 'Reprogramado', '#F1ECEF', '#6B6468']; if (tr.cancelled) return ['Viaje cancelado', '#FBE3E3', '#B22A2A']; if (tr.past) return ['Usado', '#F1ECEF', '#6B6468']; if (t.payStatus === 'pendiente') return ['Pago pendiente', '#FFF4DB', '#8A5A00']; return ['Activo', '#DDF3E8', '#147A52']; };
+    const bq = { q: s.q, onQ: e => this.setState({ q: e.target.value }), search: () => this.setState({ searched: s.q, act: null }), none: !!s.searched && !res.length,
+      results: res.map(t => { const v = SD.view(t); const tr = SD.getTrip(t.tripId); const [sLabel, sBg, sFg] = stOf(t); return Object.assign({}, v, { channel: t.channel, sLabel, sBg, sFg, bd: s.act && s.act.id === t.id ? '#E4007C' : '#EFE8EC', canAct: t.status === 'activo' && !tr.past,
+        reprog: () => this.setState({ act: { id: t.id, kind: 'rp' }, rpDate: null, rpSeat: null, waive: tr.cancelled }), cancel: () => this.setState({ act: { id: t.id, kind: 'cx' } }) }); }) };
+    let act = {};
+    const at = s.act ? SD.allTickets().map(SD.applyOv).find(t => t.id === s.act.id) : null;
+    if (at) {
+      const tr = SD.getTrip(at.tripId);
+      const by = { channel: 'Mostrador', branch: BR, user: SELLER };
+      const label = at.code + ' · ' + at.nombre + ' ' + at.apellido;
+      if (s.act.kind === 'rp') {
+        const gate = SD.reprogQuote(at, tr, at.cls);
+        const rpDate = s.rpDate || SD.addDays(tr.date, 1);
+        const nt = SD.tripsOn(rpDate).find(t => t.line === tr.line && t.dir === tr.dir && t.id !== tr.id && !t.past && !t.cancelled);
+        const qt = nt && s.rpSeat ? SD.reprogQuote(at, nt, s.rpSeat.cls) : null;
+        const fee = qt ? (s.waive ? 0 : qt.fee) : 0, diff = qt ? qt.diff : 0;
+        act = { rp: true, label, blocked: !gate.allowed, open: gate.allowed, days: dayList(rpDate, d => !!SD.tripsOn(d).find(t => t.line === tr.line && t.dir === tr.dir && t.id !== tr.id && !t.past && !t.cancelled), d => this.setState({ rpDate: d, rpSeat: null })),
+          hasTrip: !!nt, seats: nt ? SD.seatsFor(nt) : [], selected: s.rpSeat ? [s.rpSeat.n] : [], toggle: x => this.setState({ rpSeat: { n: x.n, cls: x.cls } }),
+          newTrip: nt ? 'Nuevo: ' + nt.route + ' · ' + SD.when(nt, at.stop).full + (s.rpSeat ? ' · Asiento ' + s.rpSeat.n : '') : 'Elegí la nueva fecha',
+          fee: money(fee), diff: money(diff), total: money(fee + diff), waiveBg: s.waive ? '#E4007C' : '#fff', waiveMark: s.waive ? 'check' : '', toggleWaive: () => this.setState({ waive: !s.waive }),
+          notReady: !qt, btnBg: qt ? 'linear-gradient(135deg,#E4007C,#FF4FA0)' : '#D9D1D5', close: () => this.setState({ act: null }),
+          confirm: () => { if (!qt) return; const n = SD.reprogram(at, nt.id, s.rpSeat, Object.assign({ reason: s.waive ? 'Excepción autorizada en mostrador' : 'A pedido del pasajero' }, by)); if (s.waive) SD.set(x => ({ purchases: x.purchases.map(p => p.id === n.id ? Object.assign({}, p, { price: at.price + diff }) : p), changes: x.changes.map((c, i) => i === 0 ? Object.assign({}, c, { fee: diff }) : c) })); this.setState({ act: null, searched: n.code, tab: 'buscar' }); this.toast('Reprogramado. Nuevo boleto emitido para ' + at.nombre); } };
+      } else {
+        const qx = SD.cancelQuote(at);
+        act = { cx: true, label, paid: money(at.price), cfee: money(qx.fee), refund: money(qx.refund), pctLabel: (100 - qx.pct) + '%', cxBlocked: !qx.allowed, refundWhere: at.channel === 'Online' ? 'Compra online: el reintegro se hace a MercadoPago en 5 a 10 días hábiles.' : 'Reintegro en efectivo desde esta caja.', close: () => this.setState({ act: null }),
+          confirmCx: () => { SD.cancelTicket(at, Object.assign({ reason: 'Cancelado en mostrador' }, by)); this.setState({ act: null }); this.toast('Pasaje cancelado · reintegro ' + money(qx.refund)); } };
+      }
+    }
+    // viajes
+    const vlist = SD.monthTrips().filter(t => t.dep > NOW - 3 * 36e5).sort((a, b) => a.dep - b.dep).slice(0, 10);
+    const vsel = s.vtrip ? SD.getTrip(s.vtrip) : vlist[0];
+    const vtrips = vlist.map(t => { const a = SD.avail(t); return { route: t.route, date: SD.dshort(t.date), time: SD.hm(t.depMin), pct: a.pct, occ: t.cancelled ? 'Cancelado' : a.occ + '/60', bd: vsel && vsel.id === t.id ? '#E4007C' : '#EFE8EC', op: t.cancelled ? .6 : 1, on: () => this.setState({ vtrip: t.id }) }; });
+    const va = vsel ? SD.avail(vsel) : null;
+    const vt = vsel ? { route: vsel.route, when: SD.when(vsel, SD.stopsOf(vsel.line, vsel.dir)[0]).full, car: vsel.car, counts: va.occ + ' ocupados · ' + va.total + ' libres', seats: SD.seatsFor(vsel), pax: SD.ticketsOf(vsel).sort((a, b) => a.seat - b.seat).map(t => ({ seat: t.seat, name: t.nombre + ' ' + t.apellido, stop: t.stop })) } : { seats: [], pax: [] };
+    // historial
+    const pays = SD.payments().filter(p => p.branch === BR && p.status !== 'rechazado');
+    const hist = { isPay: s.hist === 'pay', isChg: s.hist === 'chg',
+      tabs: [['pay', 'Pagos'], ['chg', 'Reprogramaciones y cancelaciones']].map(([k, label]) => Object.assign({ label, on: () => this.setState({ hist: k }) }, chip(s.hist === k))),
+      pays: pays.slice(0, 30).map(p => ({ date: SD.fmtDate(p.date), code: p.code, payer: p.payer, trip: p.route.replace(' → ', '→') + ' ' + p.tripDate, channel: p.channel, seller: p.seller.split(' ')[0], method: p.method, amount: money(p.amount), bg: p.seller === SELLER && SD.sameDay(p.date, NOW) ? '#FFFBFD' : '#fff' })),
+      chg: st.changes.filter(c => c.branch === BR).map(c => ({ date: SD.fmtDate(c.date), code: c.code, pax: c.pax, type: c.type, from: c.from, to: c.to, reason: c.reason, fee: c.fee ? money(c.fee) : '—', refund: c.refund ? money(c.refund) : '—' })) };
+    hist.chgEmpty = !hist.chg.length;
+    // caja
+    const todayP = pays.filter(p => SD.sameDay(p.date, NOW) && p.seller === SELLER);
+    const by = m => todayP.filter(p => p.method === m);
+    const sumA = a => a.reduce((x, p) => x + p.amount, 0), paxN = a => a.reduce((x, p) => x + p.pax, 0);
+    const refunds = st.changes.filter(c => c.type === 'Cancelación' && c.user === SELLER && SD.sameDay(c.date, NOW)).reduce((x, c) => x + c.refund, 0);
+    const cash = sumA(by('Efectivo'));
+    const expected = 20000 + cash - refunds;
+    const counted = s.counted === '' ? expected : (parseInt(String(s.counted).replace(/\D/g, ''), 10) || 0);
+    const diff = counted - expected;
+    const closed = !!st.cajaClosed;
+    const caja = { rows: [['payments', 'Efectivo'], ['account_balance', 'Transferencia'], ['qr_code_2', 'MercadoPago QR'], ['accessible', 'Cortesía CUD']].map(([icon, m]) => ({ icon, label: m, count: paxN(by(m)) + ' pasajes', amount: money(sumA(by(m))) })),
+      count: paxN(todayP) + ' pasajes', total: money(sumA(todayP)), cash: money(cash), refunds: '-' + money(refunds), expected: money(expected), counted: s.counted === '' ? String(expected) : s.counted, onCounted: e => this.setState({ counted: e.target.value }),
+      diff: (diff > 0 ? '+' : '') + money(diff), diffBg: diff === 0 ? '#DDF3E8' : '#FBE3E3', diffFg: diff === 0 ? '#147A52' : '#B22A2A',
+      closed, open: !closed, state: closed ? 'Cerrada' : 'Abierta', sBg: closed ? '#F1ECEF' : '#DDF3E8', sFg: closed ? '#6B6468' : '#147A52',
+      close: () => { SD.set({ cajaClosed: true }); this.toast('Caja cerrada. Resumen enviado a administración.'); }, print: () => this.toast('Imprimiendo resumen de caja…') };
+    return { tabs, tab, sale, bq, act, vtrips, vt, hist, caja, toast: s.toast };
+  }
+}
+</script>
+</body>
+</html>
