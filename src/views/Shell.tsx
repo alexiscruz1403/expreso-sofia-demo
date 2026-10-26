@@ -28,7 +28,7 @@ export default class Shell extends React.Component<any, any> {
     const sc = st.scenario || {};
     const setSc = (k, v) => SD.set(s => ({ scenario: Object.assign({}, s.scenario, { [k]: v }) }));
     const roleList = [['pasajero', 'Pasajero'], ['admin', 'Admin'], ['ventas', 'Ventas'], ['staff', 'Staff']];
-    const accounts = [['Admin', 'admin@expresosofia.com.ar'], ['Ventas · Salta', 'ventas@expresosofia.com.ar'], ['Staff · Azafata', 'staff@expresosofia.com.ar']];
+    const accounts = [['Admin', 'admin@expresosofia.com.ar'], ['Ventas · Salta', 'ventas@expresosofia.com.ar'], ['Staff · Azafata', 'staff@expresosofia.com.ar'], ['Staff · Chofer', 'sergio@expresosofia.com.ar']];
     const doLogin = () => {
       const e = this.state.email.trim().toLowerCase();
       if (!e || !this.state.pass) return this.setState({ error: 'Completá tu email y contraseña.' });
@@ -38,6 +38,7 @@ export default class Shell extends React.Component<any, any> {
         if (!u || this.state.pass.toLowerCase() !== 'sofia2026') return this.setState({ loading: false, error: 'El email o la contraseña no son correctos. Revisalos e intentá de nuevo.' });
         if (!u.activo) return this.setState({ loading: false, error: 'Tu usuario está desactivado. Consultá con administración.' });
         this.setState({ loading: false });
+        if (u.rol === 'Azafata' || u.rol === 'Chofer') SD.set({ staffUserId: u.id });
         setRole(u.rol === 'Administrador' ? 'admin' : u.rol === 'Vendedor' ? 'ventas' : 'staff');
       }, 900);
     };

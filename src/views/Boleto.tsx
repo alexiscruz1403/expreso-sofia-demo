@@ -37,7 +37,6 @@ export default function Boleto(props: any) {
       <div><div style={css("font:600 10px 'Barlow',sans-serif;color:#716A6E;letter-spacing:.08em")}>PISO · CLASE</div><div style={css("font:700 14px 'Barlow',sans-serif")}>{$.t?.floor}</div><div style={css("font:500 12px 'Barlow',sans-serif;color:#4A4447")}>{$.t?.cls}</div></div>
       <div style={css("display:flex;gap:14px")}>
         <div><div style={css("font:600 10px 'Barlow',sans-serif;color:#716A6E;letter-spacing:.08em")}>ASIENTO</div><div style={css("font:800 28px/1 'Barlow Condensed',sans-serif;color:#E4007C")}>{$.t?.seat}</div></div>
-        <div><div style={css("font:600 10px 'Barlow',sans-serif;color:#716A6E;letter-spacing:.08em")}>COCHE</div><div style={css("font:800 28px/1 'Barlow Condensed',sans-serif")}>{$.t?.car}</div></div>
       </div>
     </div>
     <div style={css("position:relative;height:0;border-top:2px dashed #EDE5E9;margin:2px -18px")}></div>

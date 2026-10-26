@@ -5,7 +5,6 @@ import SD from '../data/sofia';
 import { css, pc } from '../lib/dc';
 import SeatMap from './SeatMap';
 import { Toast, EmptyState, submitOnEnter } from './ui';
-const MY_TRIPS = ['TV-2026-10-16', 'TI-2026-10-17', 'TV-2026-10-17'];
 
 export default class Staff extends React.Component<any, any> {
   [key: string]: any;
@@ -19,31 +18,34 @@ export default class Staff extends React.Component<any, any> {
     const s = this.state, st = SD.get(), ck = st.checkins || {};
     const setCk = (id, val) => SD.set(x => { const c = Object.assign({}, x.checkins); if (val) c[id] = val; else delete c[id]; return { checkins: c }; });
     const counts = (t) => { const tk = SD.ticketsOf(t); if (t.past) return { exp: tk.length, b: Math.max(0, tk.length - 2), n: Math.min(2, tk.length), tk }; return { exp: tk.length, b: tk.filter(k => ck[k.id] === 'abordo').length, n: tk.filter(k => ck[k.id] === 'noshow').length, tk }; };
-    const trips = MY_TRIPS.map(id => { const t = SD.getTrip(id); const c = counts(t); const w = SD.when(t, SD.stopsOf(t.line, t.dir)[0]); const isNext = id === 'TI-2026-10-17';
-      return { route: t.route, car: t.car, when: w.dateLong + ' · ' + w.time + ' hs', note: w.note, hasNote: !!w.note, pct: c.exp ? Math.round(c.b / c.exp * 100) : 0, count: c.b + ' / ' + c.exp,
+    const me = st.users.find(u => u.id === st.staffUserId) || st.users.find(u => u.id === 'u10');
+    const L = me.sucursal === 'Orán' ? 'O' : 'T';
+    const myTrips = [L + 'V-2026-10-16', L + 'I-2026-10-17', L + 'V-2026-10-17'];
+    const trips = myTrips.map(id => { const t = SD.getTrip(id); const c = counts(t); const w = SD.when(t, SD.stopsOf(t.line, t.dir)[0]); const isNext = id === L + 'I-2026-10-17';
+      return { route: t.route, when: w.dateLong + ' · ' + w.time + ' hs', note: w.note, hasNote: !!w.note, pct: c.exp ? Math.round(c.b / c.exp * 100) : 0, count: c.b + ' / ' + c.exp,
         state: t.past ? 'Finalizado' : isNext ? 'Próximo · check-in abierto' : 'Programado', sBg: t.past ? '#F1ECEF' : isNext ? '#E4007C' : '#FDE6F2', sFg: t.past ? '#6B6468' : isNext ? '#fff' : '#A3005A',
         bd: isNext ? '#E4007C' : '#EFE8EC', op: t.past ? .7 : 1, on: () => this.setState({ view: 'trip', tripId: id, tab: 'list' }) }; });
     const t = SD.getTrip(s.tripId); const c = counts(t);
     const order = SD.stopsOf(t.line, t.dir);
     const stCol = k => ck[k.id] === 'abordo' ? ['#DDF3E8', '#147A52', 'Abordó'] : ck[k.id] === 'noshow' ? ['#FBE3E3', '#B22A2A', 'No vino'] : ['#FDE6F2', '#A3005A', 'Esperado'];
     const groups = order.map(stp => { const px = c.tk.filter(k => k.stop === stp).sort((a, b) => a.seat - b.seat); const done = px.length && px.every(k => ck[k.id]); return { stop: t.dir === 'ida' ? stp : 'Baja en ' + stp, time: SD.hm(t.dir === 'ida' ? SD.stopMin(t, stp) : SD.arrMin(t, stp)) + ' hs', count: px.filter(k => ck[k.id] === 'abordo').length + '/' + px.length, hBg: done ? '#DDF3E8' : '#FAF8F9', hFg: done ? '#147A52' : '#1D1A1C',
-      pax: px.map(k => { const [sBg, sFg, state] = stCol(k); return { seat: k.seat, name: k.nombre + ' ' + k.apellido, dni: SD.dni(k.dni), cls: k.cud ? 'CUD' : k.cls === 'semi' ? 'Semicama' : 'Cama', sBg, sFg, state, on: () => this.setState({ sheet: k.id }) }; }), empty: !px.length, emptyText: t.dir === 'ida' ? 'Nadie sube en esta parada.' : 'Nadie baja en esta parada.' }; });
+      pax: px.map(k => { const [sBg, sFg, state] = stCol(k); return { seat: k.seat, name: k.nombre + ' ' + k.apellido, dni: SD.dni(k.dni), cls: (k.cls === 'semi' ? 'Semicama' : 'Cama') + (k.onco ? ' · Oncológico' : ''), sBg, sFg, state, on: () => this.setState({ sheet: k.id }) }; }), empty: !px.length, emptyText: t.dir === 'ida' ? 'Nadie sube en esta parada.' : 'Nadie baja en esta parada.' }; });
     const tab = s.tab;
-    const trip = { route: t.route, when: SD.when(t, order[0]).full, car: t.car, boarded: c.b, expected: c.exp, noshow: c.n, pct: c.exp ? Math.round(c.b / c.exp * 100) : 0,
+    const trip = { route: t.route, when: SD.when(t, order[0]).full, boarded: c.b, expected: c.exp, noshow: c.n, pct: c.exp ? Math.round(c.b / c.exp * 100) : 0,
       tabList: () => this.setState({ tab: 'list' }), tabMap: () => this.setState({ tab: 'map' }), showList: tab === 'list', showMap: tab === 'map',
       lBg: tab === 'list' ? '#fff' : 'transparent', lFg: tab === 'list' ? '#1D1A1C' : '#CFC6CA', mBg: tab === 'map' ? '#fff' : 'transparent', mFg: tab === 'map' ? '#1D1A1C' : '#CFC6CA',
       groups, noPax: !c.tk.length, seats: SD.seatsFor(t), checkins: ck, seatTap: x => x.t && this.setState({ sheet: x.t.id }),
       download: () => this.toast('Nómina descargada (' + c.exp + ' pasajeros)') };
     // sheet
     const sk = s.sheet ? c.tk.find(k => k.id === s.sheet) : null;
-    const sheet = sk ? { open: true, seat: sk.seat, name: sk.nombre + ' ' + sk.apellido, dni: SD.dni(sk.dni), stop: sk.stop, cls: sk.cud ? 'CUD' : sk.cls === 'semi' ? 'Semicama' : 'Cama', code: sk.code, state: stCol(sk)[2], canUndo: !!ck[sk.id],
+    const sheet = sk ? { open: true, seat: sk.seat, name: sk.nombre + ' ' + sk.apellido, dni: SD.dni(sk.dni), stop: sk.stop, cls: (sk.cls === 'semi' ? 'Semicama' : 'Cama') + (sk.onco ? ' · Oncológico' : ''), code: sk.code, state: stCol(sk)[2], canUndo: !!ck[sk.id],
       close: () => this.setState({ sheet: null }), halt: e => e.stopPropagation(), board: () => { setCk(sk.id, 'abordo'); this.setState({ sheet: null }); }, noshow: () => { setCk(sk.id, 'noshow'); this.setState({ sheet: null }); }, undo: () => { setCk(sk.id, null); this.setState({ sheet: null }); } } : { open: false };
     // scan
     const run = code => { const r = SD.validate(code, t.id); this.setState({ scan: Object.assign({ code }, r) }); };
     const online = st.purchases.filter(p => p.tripId === t.id && p.status === 'activo' && !ck[p.id]);
     const firstFree = online[0] || c.tk.find(k => !ck[k.id]);
     const used = c.tk.find(k => ck[k.id] === 'abordo');
-    const other = SD.ticketsOf(SD.getTrip('OI-2026-10-17'))[0];
+    const other = SD.ticketsOf(SD.getTrip((L === 'T' ? 'OI' : 'TI') + '-2026-10-17'))[0];
     const r = s.scan;
     const map = { valido: ['#1F9D6B', 'check_circle', 'Boleto válido', 'Corresponde a este viaje'], usado: ['#E59A0B', 'history', 'Boleto ya usado', 'Este pasajero ya abordó'], otro: ['#D33A3A', 'wrong_location', 'Boleto de otro viaje', ''], invalido: ['#D33A3A', 'error', 'Boleto no válido', 'No existe o fue cancelado/reprogramado'] };
     const m = r ? map[r.res] : null;
@@ -52,7 +54,7 @@ export default class Staff extends React.Component<any, any> {
       isValid: !!(r && r.res === 'valido'), board: () => { setCk(r.t.id, 'abordo'); this.toast('Abordó: ' + r.t.nombre + ' · asiento ' + r.t.seat); this.setState({ scan: null }); }, again: () => this.setState({ scan: null, code: '' }),
       sims: [['Boleto válido' + (online[0] ? ' (compra online)' : ''), '#4ADE9B', () => firstFree && run(firstFree.id)], ['Boleto ya usado', '#F5B841', () => { if (used) run(used.id); else if (firstFree) { setCk(firstFree.id, 'abordo'); setTimeout(() => run(firstFree.id), 0); } }], ['Boleto de otro viaje', '#FF6B6B', () => other && run(other.id)]].map(([label, dot, on]) => ({ label, dot, on })),
       code: s.code, onCode: e => this.setState({ code: e.target.value }), check: () => { const q = s.code.trim().toUpperCase(); const k = c.tk.find(x => x.code === q) || SD.allTickets().find(x => x.code === q); run(k ? k.id : q); } };
-    return { v: { list: s.view === 'list', trip: s.view === 'trip', scan: s.view === 'scan' }, trips, trip, sheet, scan, toList: () => this.setState({ view: 'list' }), toTrip: () => this.setState({ view: 'trip', scan: null }), toScan: () => this.setState({ view: 'scan', scan: null, code: '' }), toast: s.toast };
+    return { v: { list: s.view === 'list', trip: s.view === 'trip', scan: s.view === 'scan' }, trips, trip, sheet, scan, toList: () => this.setState({ view: 'list' }), toTrip: () => this.setState({ view: 'trip', scan: null }), toScan: () => this.setState({ view: 'scan', scan: null, code: '' }), toast: s.toast, me: { line: me.nombre + ' · ' + me.email + ' · ' + me.rol, ini: me.nombre.split(' ').map(w => w[0]).join('').slice(0, 2) } };
   }
 
   render() {
@@ -64,13 +66,13 @@ export default class Staff extends React.Component<any, any> {
 
   {!!($.v?.list) && (<>
     <div style={css("background:#1D1A1C;color:#fff;padding:22px 18px 22px;display:flex;flex-direction:column;gap:14px")}>
-      <div style={css("display:flex;justify-content:space-between;align-items:center")}><div style={css("background:#fff;border-radius:12px;padding:4px 8px;display:flex")}><img src="/assets/logo.png" alt="Expreso Sofía" style={css("height:34px")} /></div><span style={css("width:40px;height:40px;border-radius:50%;background:#E4007C;display:flex;align-items:center;justify-content:center;font:800 14px 'Barlow',sans-serif")}>MF</span></div>
-      <div><div style={css("font:600 13px 'Barlow',sans-serif;color:#CFC6CA")}>Hola, Micaela · Azafata</div><div style={css("font:800 30px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin-top:4px")}>Tus viajes de hoy</div><div style={css("font:500 13px 'Barlow',sans-serif;color:#CFC6CA;margin-top:4px")}>Viernes 16 de octubre · 20:30 hs</div></div>
+      <div style={css("display:flex;justify-content:space-between;align-items:center")}><div style={css("background:#fff;border-radius:12px;padding:4px 8px;display:flex")}><img src="/assets/logo.png" alt="Expreso Sofía" style={css("height:34px")} /></div><span style={css("width:40px;height:40px;border-radius:50%;background:#E4007C;display:flex;align-items:center;justify-content:center;font:800 14px 'Barlow',sans-serif")}>{$.me?.ini}</span></div>
+      <div><div style={css("font:600 13px 'Barlow',sans-serif;color:#CFC6CA")}>{$.me?.line}</div><div style={css("font:800 30px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin-top:4px")}>Tus viajes de hoy</div><div style={css("font:500 13px 'Barlow',sans-serif;color:#CFC6CA;margin-top:4px")}>Viernes 16 de octubre · 20:30 hs</div></div>
     </div>
     <div style={css("padding:16px;display:flex;flex-direction:column;gap:12px")}>
       {(Array.isArray($.trips) ? $.trips : []).map((t: any, $index: number) => (<React.Fragment key={$index}>
         <button onClick={t?.on} style={css(`background:#fff;border:2px solid ${t?.bd ?? ''};border-radius:18px;padding:16px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:10px;opacity:${t?.op ?? ''}`)}>
-          <div style={css("display:flex;justify-content:space-between;align-items:center;gap:8px")}><span style={css(`border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif;background:${t?.sBg ?? ''};color:${t?.sFg ?? ''}`)}>{t?.state}</span><span style={css("font:600 12px 'Barlow',sans-serif;color:#6B6468")}>Coche N° {t?.car}</span></div>
+          <div style={css("display:flex;justify-content:space-between;align-items:center;gap:8px")}><span style={css(`border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif;background:${t?.sBg ?? ''};color:${t?.sFg ?? ''}`)}>{t?.state}</span></div>
           <div style={css("font:800 24px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;color:#1D1A1C")}>{t?.route}</div>
           <div style={css("font:600 14px 'Barlow',sans-serif;color:#1D1A1C")}>{t?.when}</div>
           {!!(t?.hasNote) && (<><div style={css("font:600 12.5px 'Barlow',sans-serif;color:#4B2C82")}>{t?.note}</div></>)}
@@ -86,7 +88,7 @@ export default class Staff extends React.Component<any, any> {
         <button onClick={$.toList} style={css("width:40px;height:40px;border-radius:50%;border:none;background:#3A3437;color:#fff;cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px")}>arrow_back</button>
         <button onClick={$.trip?.download} style={css("height:40px;padding:0 14px;border-radius:999px;border:none;background:#3A3437;color:#fff;cursor:pointer;font:700 13px 'Barlow',sans-serif;display:flex;align-items:center;gap:6px")}><span style={css("font-family:'Material Symbols Rounded';font-size:18px")}>download</span>Nómina</button>
       </div>
-      <div><div style={css("font:800 26px/1 'Barlow Condensed',sans-serif;text-transform:uppercase")}>{$.trip?.route}</div><div style={css("font:500 13px 'Barlow',sans-serif;color:#CFC6CA;margin-top:3px")}>{$.trip?.when} · Coche N° {$.trip?.car}</div></div>
+      <div><div style={css("font:800 26px/1 'Barlow Condensed',sans-serif;text-transform:uppercase")}>{$.trip?.route}</div><div style={css("font:500 13px 'Barlow',sans-serif;color:#CFC6CA;margin-top:3px")}>{$.trip?.when}</div></div>
       <div style={css("display:flex;align-items:flex-end;gap:12px")}>
         <div><div style={css("font:900 40px/1 'Barlow Condensed',sans-serif")}><span style={css("color:#4ADE9B")}>{$.trip?.boarded}</span><span style={css("color:#A69CA1;font-size:26px")}> / {$.trip?.expected}</span></div><div style={css("font:600 12px 'Barlow',sans-serif;color:#CFC6CA")}>abordaron · {$.trip?.noshow} no se presentaron</div></div>
         <div style={css("flex:1;height:10px;border-radius:10px;background:#3A3437;overflow:hidden;margin-bottom:8px")}><div style={css(`height:100%;width:${$.trip?.pct ?? ''}%;background:#4ADE9B`)}></div></div>

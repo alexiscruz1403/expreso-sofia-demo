@@ -23,7 +23,6 @@ export default class SeatMap extends React.Component<any, any> {
       libre: ['#FFFFFF', '#D9CFD4', '#1D1A1C'],
       ocupado: ['#ECE7EA', '#ECE7EA', '#B3A9AE'],
       sel: ['#E4007C', '#E4007C', '#FFFFFF'],
-      cud: ['#EAF1FD', '#2E6BD8', '#2E6BD8'],
       abordo: ['#DDF3E8', '#1F9D6B', '#147A52'],
       noshow: ['#FBE3E3', '#D33A3A', '#B22A2A'],
       pend: ['#FDE6F2', '#F08BBF', '#A3005A'],
@@ -38,12 +37,12 @@ export default class SeatMap extends React.Component<any, any> {
         if (mode === 'buy') { k = 'ocupado'; cursor = 'not-allowed'; title = 'Asiento ' + s.n + ' · ocupado'; }
         else if (mode === 'staff' && s.t) { const c = checkins[s.t.id]; k = c === 'abordo' ? 'abordo' : c === 'noshow' ? 'noshow' : 'pend'; title = s.n + ' · ' + s.t.nombre + ' ' + s.t.apellido + ' · ' + s.t.stop; }
         else { k = 'pend'; title = s.t ? s.n + ' · ' + s.t.nombre + ' ' + s.t.apellido + ' · sube en ' + s.t.stop : 'Asiento ' + s.n + ' · ocupado'; }
-      } else if (s.cud) { k = 'cud'; title = 'Asiento ' + s.n + ' · reservado para pasajero con discapacidad (CUD)'; }
+      }
       if (held.includes(s.n)) k = 'hold';
       if (isSel) k = 'sel';
       if (mode !== 'buy' && s.status !== 'ocupado' && !isSel) cursor = mode === 'pick' ? 'pointer' : 'default';
       const [bg, bd, fg] = C[k];
-      return { isSeat: true, aisle: false, disabled: (mode === 'buy' || mode === 'pick') && s.status === 'ocupado', n: s.n, label: s.n, sub: s.cud ? 'CUD' : (s.cls === 'cama' ? 'CAMA' : ''), bg, bd, fg, cursor, title,
+      return { isSeat: true, aisle: false, disabled: (mode === 'buy' || mode === 'pick') && s.status === 'ocupado', n: s.n, label: s.n, sub: s.cls === 'cama' ? 'CAMA' : '', bg, bd, fg, cursor, title,
         onClick: () => { if (p.onToggle && !(mode === 'buy' && s.status === 'ocupado') && !(mode === 'pick' && s.status === 'ocupado')) p.onToggle(s); } };
     };
     const up = seats.filter(s => s.n <= 48), lo = seats.filter(s => s.n > 48);
@@ -51,9 +50,9 @@ export default class SeatMap extends React.Component<any, any> {
     for (let r = 0; r < 12; r++) { const b = r * 4; const row = [cell(up[b]), cell(up[b + 1]), null, cell(up[b + 2]), cell(up[b + 3])].map(x => x || { aisle: true, isSeat: false }); row[2] = { aisle: true, isSeat: false, rowNum: r + 1 }; rowsAlta.push(row); }
     for (let r = 0; r < 4; r++) { const b = r * 3; rowsBaja.push([cell(lo[b]), cell(lo[b + 1]), { aisle: true, isSeat: false }, cell(lo[b + 2])]); }
     const freeAlta = up.filter(s => s.status === 'libre').length, freeBaja = lo.filter(s => s.status === 'libre').length;
-    const legendBuy = [{ label: 'Libre', bg: C.libre[0], bd: C.libre[1] }, { label: 'Ocupado', bg: C.ocupado[0], bd: C.ocupado[1] }, { label: 'Tu selección', bg: C.sel[0], bd: C.sel[1] }, { label: 'Reservado CUD (discapacidad)', bg: C.cud[0], bd: C.cud[1] }];
-    const legendStaff = [{ label: 'Esperado', bg: C.pend[0], bd: C.pend[1] }, { label: 'Abordó', bg: C.abordo[0], bd: C.abordo[1] }, { label: 'No se presentó', bg: C.noshow[0], bd: C.noshow[1] }, { label: 'Libre', bg: C.libre[0], bd: C.libre[1] }, { label: 'CUD', bg: C.cud[0], bd: C.cud[1] }];
-    const legendView = [{ label: 'Ocupado', bg: C.pend[0], bd: C.pend[1] }, { label: 'Libre', bg: C.libre[0], bd: C.libre[1] }, { label: 'Reservado CUD', bg: C.cud[0], bd: C.cud[1] }, { label: 'Seleccionado', bg: C.sel[0], bd: C.sel[1] }];
+    const legendBuy = [{ label: 'Libre', bg: C.libre[0], bd: C.libre[1] }, { label: 'Ocupado', bg: C.ocupado[0], bd: C.ocupado[1] }, { label: 'Tu selección', bg: C.sel[0], bd: C.sel[1] }];
+    const legendStaff = [{ label: 'Esperado', bg: C.pend[0], bd: C.pend[1] }, { label: 'Abordó', bg: C.abordo[0], bd: C.abordo[1] }, { label: 'No se presentó', bg: C.noshow[0], bd: C.noshow[1] }, { label: 'Libre', bg: C.libre[0], bd: C.libre[1] }];
+    const legendView = [{ label: 'Ocupado', bg: C.pend[0], bd: C.pend[1] }, { label: 'Libre', bg: C.libre[0], bd: C.libre[1] }, { label: 'Seleccionado', bg: C.sel[0], bd: C.sel[1] }];
     const on = ['#FFFFFF', '#E4007C'], off = ['transparent', '#6B6468'];
     return {
       size, gap: Math.round(size / 7), aisle: Math.round(size * 0.6), fs: size >= 40 ? 13 : 11,
