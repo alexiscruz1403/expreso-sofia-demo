@@ -94,3 +94,35 @@ export function ConfirmHost() {
     </div>
   );
 }
+
+export interface Page<T> { rows: T[]; page: number; pages: number; total: number; from: number; to: number; go: (n: number) => void }
+
+/** Slices `items` into pages of `size`. The page resets to the first one when `sig` (the active filters) changes. */
+export function paginate<T>(items: T[], saved: { n: number; sig: string } | undefined, sig: string, go: (n: number, sig: string) => void, size = 10): Page<T> {
+  const pages = Math.max(1, Math.ceil(items.length / size));
+  const n = saved && saved.sig === sig ? Math.min(saved.n, pages - 1) : 0;
+  return { rows: items.slice(n * size, n * size + size), page: n, pages, total: items.length, from: items.length ? n * size + 1 : 0, to: Math.min(items.length, n * size + size), go: k => go(k, sig) };
+}
+
+/** "Mostrando 1–10 de N" plus previous/next and page buttons. Renders nothing when everything fits in one page. */
+export function Pager({ pg, noun = 'resultados' }: { pg?: Page<unknown>; noun?: string }) {
+  if (!pg || pg.pages <= 1) return null;
+  const n = pg.page, last = pg.pages - 1;
+  const nums = Array.from(new Set([0, n - 1, n, n + 1, last])).filter(i => i >= 0 && i <= last).sort((a, b) => a - b);
+  const items: (number | string)[] = [];
+  nums.forEach((i, k) => { if (k && i - nums[k - 1] > 1) items.push('gap' + i); items.push(i); });
+  const btn = (on: boolean) => css(`min-width:40px;height:40px;padding:0 8px;border-radius:999px;border:1.5px solid ${on ? '#1D1A1C' : '#E2D9DE'};background:${on ? '#1D1A1C' : '#fff'};color:${on ? '#fff' : '#1D1A1C'};font:700 14px 'Barlow',sans-serif;cursor:pointer;font-variant-numeric:tabular-nums`);
+  const arrow = (dis: boolean) => css(`width:40px;height:40px;border-radius:50%;border:1.5px solid #E2D9DE;background:#fff;color:#1D1A1C;cursor:${dis ? 'default' : 'pointer'};opacity:${dis ? .4 : 1};font-family:'Material Symbols Rounded';font-size:22px;display:flex;align-items:center;justify-content:center`);
+  return (
+    <nav aria-label="Paginación" style={css('display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap')}>
+      <span style={css("font:600 13px 'Barlow',sans-serif;color:#716A6E;font-variant-numeric:tabular-nums")}>Mostrando {pg.from}–{pg.to} de {pg.total.toLocaleString('es-AR')} {noun}</span>
+      <div style={css('display:flex;gap:4px;align-items:center')}>
+        <button type="button" aria-label="Página anterior" disabled={n === 0} onClick={() => pg.go(n - 1)} style={arrow(n === 0)}>chevron_left</button>
+        {items.map(i => typeof i === 'string'
+          ? <span key={i} aria-hidden="true" style={css("width:20px;text-align:center;color:#716A6E;font:700 14px 'Barlow',sans-serif")}>…</span>
+          : <button key={i} type="button" aria-label={'Página ' + (i + 1)} aria-current={i === n ? 'page' : undefined} onClick={() => pg.go(i)} style={btn(i === n)}>{i + 1}</button>)}
+        <button type="button" aria-label="Página siguiente" disabled={n === last} onClick={() => pg.go(n + 1)} style={arrow(n === last)}>chevron_right</button>
+      </div>
+    </nav>
+  );
+}

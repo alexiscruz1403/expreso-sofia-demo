@@ -7,9 +7,9 @@ cancelaciones, check-ins, etc.) viven **solo en memoria** y se pierden al recarg
 ## Vistas
 
 - **Pasajero**: búsqueda, asientos, datos, pago MercadoPago simulado, boleto, Mis pasajes, reprogramación, cancelación, contacto.
-- **Admin**: dashboard, viajes, detalle de viaje, líneas, tarifas, unidades, pagos, cambios, usuarios.
-- **Ventas**: venta en mostrador, reprogramar/cancelar, viajes, historial, cierre de caja.
-- **Staff**: viajes del día, pasajeros por parada, mapa de asientos, escaneo de boletos.
+- **Admin**: dashboard, viajes, detalle de viaje, líneas, tarifas, pagos, historial de cajas, cambios, usuarios.
+- **Ventas**: venta en mostrador, reprogramar/cancelar, viajes, historial con filtros, caja (apertura con dinero inicial y cierre con arqueo).
+- **Staff**: viajes del día, pasajeros por parada, mapa de asientos, escaneo de boletos (roles Azafata y Chofer).
 - **Login**: cuentas de demo con contraseña `sofia2026`.
 
 Todas las vistas son responsive (mobile, tablet y desktop). La barra inferior permite cambiar de rol y el panel **Escenarios** simula el resultado del pago, un viaje agotado, un viaje cancelado o una reserva vencida.
@@ -21,6 +21,7 @@ Todas las vistas son responsive (mobile, tablet y desktop). La barra inferior pe
 - **Tarjeta de crédito**: los pasajes pagados con tarjeta de crédito no admiten devolución (sí reprogramación).
 - **Ida y vuelta**: no admite devolución, cambios ni reutilización; validez de 14 días corridos desde la emisión.
 - **Viaje cancelado por la empresa**: reintegro total o reprogramación sin cargo.
+- **Pacientes oncológicos**: pasaje sin cargo. Trámite presencial en sucursal con 24 h de anticipación al turno médico (historia clínica, turno médico, negativa de ANSES y DNI). Solo lo emite Ventas; no se vende online.
 - **Equipaje**: una valija y/o bolso en bodega + una mochila dentro del coche.
 
 ## Desarrollo

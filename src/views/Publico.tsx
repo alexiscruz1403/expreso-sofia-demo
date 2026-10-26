@@ -16,7 +16,7 @@ const FAQ = [
   ['¿Qué condiciones tiene el pasaje ida y vuelta?', RT_RULES],
   ['¿Pueden viajar menores solos?', 'Los menores de 18 años que viajan sin sus padres necesitan la autorización de viaje correspondiente y su DNI. Consultá en sucursal antes de comprar.'],
   ['¿Puedo viajar con mi mascota?', 'Solo se permiten perros guía o de asistencia. Para otras mascotas consultanos por WhatsApp.'],
-  ['¿Cómo saco un pasaje con CUD?', 'Marcá la opción CUD en los datos del pasajero y presentá el certificado original y tu DNI en cualquier sucursal antes de viajar. El pasaje del titular no tiene costo.'],
+  ['¿Cómo accedo al pasaje gratuito para pacientes oncológicos?', 'El trámite es presencial en la sucursal más cercana y se pide con al menos 24 hs de anticipación al turno médico. Llevá la historia clínica, el turno médico designado, la negativa de ANSES y el DNI del paciente. Este pasaje no se puede sacar por la web.'],
   ['¿Qué pasa si pierdo el colectivo?', 'Escribinos lo antes posible por WhatsApp. Según disponibilidad podemos reprogramarte para el próximo viaje con el cargo de reprogramación.']
 ];
 
@@ -71,7 +71,7 @@ export default class Publico extends React.Component<any, any> {
     const tT = SD.getTrip(SD.TONIGHT_T), aT = SD.avail(tT), aO = SD.avail(SD.getTrip(SD.TONIGHT_O));
     const urgency = {
       show: s.screen === 'home',
-      text: aT.total > 0 ? 'Quedan ' + aT.total + ' lugares para esta madrugada, Línea Tartagal · Sáb 17, 00:00 hs' : 'Línea Tartagal agotada para esta madrugada · Quedan ' + aO.total + ' lugares en Línea Orán',
+      text: aT.total > 0 ? 'Quedan ' + aT.total + ' lugares en Línea Tartagal · Sáb 17, 00:00 hs' : 'Línea Tartagal agotada para el Sáb 17, 00:00 hs · Quedan ' + aO.total + ' lugares en Línea Orán',
       on: () => { this.setState({ q: Object.assign({}, q, { origin: aT.total > 0 ? 'Tartagal' : 'Orán', dest: 'Salta', date: '2026-10-17', rt: false }), stop: null, leg: 'a', sel: { a: null, b: null }, seats: { a: [], b: [] } }); this.go('results'); this.load(); }
     };
     // search
@@ -114,7 +114,7 @@ export default class Publico extends React.Component<any, any> {
       const f = st.fares[t.line]; const blocked = t.cancelled || t.past || soldOut || t.blocked;
       const pill = (n, lbl) => n > 0 ? [lbl + ': ' + n + (n === 1 ? ' libre' : ' libres'), n <= 3 ? '#FDE6F2' : '#F1F7F3', n <= 3 ? '#A3005A' : '#147A52'] : [lbl + ': agotado', '#F1ECEF', '#716A6E'];
       const [semi, semiBg, semiFg] = pill(a.semi, 'Semicama'), [cama, camaBg, camaFg] = pill(a.cama, 'Cama');
-      return { line: t.lineName, special: t.special, few: !blocked && a.total <= 8, fewLabel: '¡Quedan ' + a.total + '!', car: 'Coche N° ' + t.car,
+      return { line: t.lineName, special: t.special, few: !blocked && a.total <= 8, fewLabel: '¡Quedan ' + a.total + '!',
         from: t.dir === 'ida' ? stop : 'Salta', to: t.dir === 'ida' ? 'Salta' : stop, date: w.date, time: w.time, arr: w.arr, hasNote: !!w.note, when: w.full,
         semi, semiBg, semiFg, cama, camaBg, camaFg, priceLabel: q.rt ? 'Ida y vuelta desde' : 'Desde', price: q.rt ? money(f.semi.iv) : money(f.semi.ida),
         ok: !blocked, blocked, op: blocked ? .7 : 1, status: t.cancelled ? 'Cancelado' : t.blocked ? 'No disponible' : t.past ? 'Ya salió' : 'Agotado',
@@ -143,20 +143,19 @@ export default class Publico extends React.Component<any, any> {
     if (curTrip) {
       const w = SD.when(curTrip, stop);
       Object.assign(seat, {
-        step: (q.rt ? (leg === 'a' ? 'IDA · ' : 'VUELTA · ') : '') + curTrip.lineName.toUpperCase() + ' · COCHE N° ' + curTrip.car,
+        step: (q.rt ? (leg === 'a' ? 'IDA · ' : 'VUELTA · ') : '') + curTrip.lineName.toUpperCase(),
         need: q.pax > 1 ? q.pax + ' asientos' : 'tu asiento', trip: (curTrip.dir === 'ida' ? stop + ' → Salta' : 'Salta → ' + stop) + ' · ' + w.full,
         seats: SD.seatsFor(curTrip), selected: chosen.map(x => x.n), pSemi: money(fareOf(curTrip, 'semi')), pCama: money(fareOf(curTrip, 'cama')),
-        toggle: (x) => { const cur = this.state.seats[leg] || []; let nx; if (cur.find(c => c.n === x.n)) nx = cur.filter(c => c.n !== x.n); else { nx = cur.concat([{ n: x.n, cls: x.cls, cud: x.cud }]); if (nx.length > q.pax) nx = nx.slice(1); } this.setState(z => ({ seats: Object.assign({}, z.seats, { [leg]: nx }) })); },
-        list: chosen.map(x => ({ n: x.n, cls: x.cud ? 'Cama · reservado CUD' : x.cls === 'semi' ? 'Semicama' : 'Cama', floor: x.n <= 48 ? 'Planta alta' : 'Planta baja', price: money(fareOf(curTrip, x.cls)) })),
-        none: chosen.length === 0, cudNote: chosen.some(x => x.cud), count: chosen.length + ' de ' + q.pax + (q.pax > 1 ? ' asientos elegidos' : ' asiento elegido'),
+        toggle: (x) => { const cur = this.state.seats[leg] || []; let nx; if (cur.find(c => c.n === x.n)) nx = cur.filter(c => c.n !== x.n); else { nx = cur.concat([{ n: x.n, cls: x.cls }]); if (nx.length > q.pax) nx = nx.slice(1); } this.setState(z => ({ seats: Object.assign({}, z.seats, { [leg]: nx }) })); },
+        list: chosen.map(x => ({ n: x.n, cls: x.cls === 'semi' ? 'Semicama' : 'Cama', floor: x.n <= 48 ? 'Planta alta' : 'Planta baja', price: money(fareOf(curTrip, x.cls)) })),
+        none: chosen.length === 0, count: chosen.length + ' de ' + q.pax + (q.pax > 1 ? ' asientos elegidos' : ' asiento elegido'),
         total: money(chosen.reduce((a, x) => a + fareOf(curTrip, x.cls), 0)), notReady: chosen.length !== q.pax, btnBg: chosen.length === q.pax ? 'linear-gradient(135deg,#C2006A,#E4007C)' : '#D9D1D5',
         nextLabel: q.rt && leg === 'a' ? 'Elegir vuelta' : 'Continuar',
         next: () => {
           if (chosen.length !== q.pax) return;
           if (q.rt && leg === 'a') { this.setState({ leg: 'b' }); this.go('results'); this.load(); return; }
-          const pax = Array.from({ length: q.pax }, (_, k) => this.state.pax[k] || { nombre: '', apellido: '', dni: '', nac: '', cud: false, stop });
+          const pax = Array.from({ length: q.pax }, (_, k) => this.state.pax[k] || { nombre: '', apellido: '', dni: '', nac: '', stop });
           const sa = this.state.seats.a || [];
-          pax.forEach((p, k) => { if (sa[k] && sa[k].cud) p.cud = true; });
           this.go('datos', { pax, tried: false, now: Date.now(), holdUntil: this.state.holdUntil || Date.now() + (sc.expire ? 8000 : 600000) });
         }
       });
@@ -165,16 +164,16 @@ export default class Publico extends React.Component<any, any> {
     const legs = q.rt ? ['a', 'b'] : ['a'];
     const legTrip = k => s.sel[k] ? SD.getTrip(s.sel[k]) : null;
     const priceFor = (k, i) => {
-      const p = s.pax[i] || {}; if (p.cud) return 0;
+      const p = s.pax[i] || {}; 
       const tr = legTrip(k), x = (s.seats[k] || [])[i]; if (!tr || !x) return 0;
       if (!q.rt) return fareOf(tr, x.cls);
       const ta = legTrip('a'), tb = legTrip('b'), xa = s.seats.a[i], xb = s.seats.b[i];
       if (!ta || !tb || !xa || !xb) return fareOf(tr, x.cls);
       return Math.round((st.fares[ta.line][xa.cls].iv + st.fares[tb.line][xb.cls].iv) / 4) * (1) * 1 + (k === 'a' ? 0 : 0) || 0;
     };
-    const legPrice = (k, i) => { if (!q.rt) return priceFor(k, i); const p = s.pax[i] || {}; if (p.cud) return 0; const ta = legTrip('a'), tb = legTrip('b'), xa = s.seats.a[i], xb = s.seats.b[i]; if (!ta || !tb || !xa || !xb) return 0; const tot = (st.fares[ta.line][xa.cls].iv + st.fares[tb.line][xb.cls].iv) / 2; return k === 'a' ? Math.round(tot / 2) : tot - Math.round(tot / 2); };
+    const legPrice = (k, i) => { if (!q.rt) return priceFor(k, i); const ta = legTrip('a'), tb = legTrip('b'), xa = s.seats.a[i], xb = s.seats.b[i]; if (!ta || !tb || !xa || !xb) return 0; const tot = (st.fares[ta.line][xa.cls].iv + st.fares[tb.line][xb.cls].iv) / 2; return k === 'a' ? Math.round(tot / 2) : tot - Math.round(tot / 2); };
     let total = 0, idaSum = 0;
-    for (let i = 0; i < q.pax; i++) legs.forEach(k => { total += legPrice(k, i); const tr = legTrip(k), x = (s.seats[k] || [])[i]; if (tr && x && !(s.pax[i] || {}).cud) idaSum += fareOf(tr, x.cls); });
+    for (let i = 0; i < q.pax; i++) legs.forEach(k => { total += legPrice(k, i); const tr = legTrip(k), x = (s.seats[k] || [])[i]; if (tr && x) idaSum += fareOf(tr, x.cls); });
     const saving = q.rt ? idaSum - total : 0;
     // hold
     const rem = Math.max(0, s.holdUntil - s.now);
@@ -191,8 +190,7 @@ export default class Publico extends React.Component<any, any> {
       const fld = (key, label, type, ph, mode) => ({ key, label, type, ph, mode: mode || 'text', value: p[key] || '', isInput: true, isSelect: false, err: err[i + '.' + key] || '', bd: err[i + '.' + key] ? '#D33A3A' : '#E2D9DE', on: e => setP(i, key, e.target.value) });
       const seatsTxt = legs.map(k => ((s.seats[k] || [])[i] ? (q.rt ? (k === 'a' ? 'Ida ' : 'Vuelta ') : 'Asiento ') + (s.seats[k][i].n) : '')).filter(Boolean).join(' · ');
       return { num: i + 1, seats: seatsTxt,
-        fields: [fld('nombre', 'Nombre', 'text', 'Como figura en el DNI'), fld('apellido', 'Apellido', 'text', ''), fld('dni', 'DNI', 'text', 'Sin puntos', 'numeric'), fld('nac', 'Fecha de nacimiento', 'date', '')],
-        toggleCud: () => setP(i, 'cud', !p.cud), cudBd: p.cud ? '#2E6BD8' : '#E2D9DE', cudBg: p.cud ? '#EAF1FD' : '#fff', cudBox: p.cud ? '#2E6BD8' : '#fff', cudMark: p.cud ? 'check' : '' };
+        fields: [fld('nombre', 'Nombre', 'text', 'Como figura en el DNI'), fld('apellido', 'Apellido', 'text', ''), fld('dni', 'DNI', 'text', 'Sin puntos', 'numeric'), fld('nac', 'Fecha de nacimiento', 'date', '')] };
     });
     const contact = { email: s.contact.email, wa: s.contact.wa, emailErr: err.email || '', waErr: err.wa || '', emailBd: err.email ? '#D33A3A' : '#E2D9DE', waBd: err.wa ? '#D33A3A' : '#E2D9DE',
       onEmail: e => this.setState({ contact: Object.assign({}, s.contact, { email: e.target.value }) }), onWa: e => this.setState({ contact: Object.assign({}, s.contact, { wa: e.target.value }) }) };
@@ -205,10 +203,10 @@ export default class Publico extends React.Component<any, any> {
     const sample = [['Lucía', 'Fernández', '32456789', '1987-03-14'], ['Matías', 'Choque', '38112450', '1994-08-02'], ['Rosa', 'Alancay', '27901334', '1979-11-20'], ['Franco', 'Villagra', '41220876', '1998-05-09'], ['Abril', 'Tolaba', '45330112', '2004-01-30']];
     // summary
     const sumLegs = legs.filter(k => legTrip(k)).map(k => { const tr = legTrip(k); const w = SD.when(tr, stop);
-      return { kind: q.rt ? (k === 'a' ? 'Ida' : 'Vuelta') : 'Solo ida', line: tr.lineName, car: 'Coche N° ' + tr.car, route: tr.dir === 'ida' ? stop + ' → Salta' : 'Salta → ' + stop, when: w.full,
-        rows: (s.seats[k] || []).map((x, i) => ({ name: ((s.pax[i] || {}).nombre || 'Pasajero ' + (i + 1)), seat: x.n, cls: '(' + (x.cls === 'semi' ? 'Semicama' : 'Cama') + ')', price: (s.pax[i] || {}).cud ? 'CUD $0' : money(legPrice(k, i)) })) }; });
+      return { kind: q.rt ? (k === 'a' ? 'Ida' : 'Vuelta') : 'Solo ida', line: tr.lineName, route: tr.dir === 'ida' ? stop + ' → Salta' : 'Salta → ' + stop, when: w.full,
+        rows: (s.seats[k] || []).map((x, i) => ({ name: ((s.pax[i] || {}).nombre || 'Pasajero ' + (i + 1)), seat: x.n, cls: '(' + (x.cls === 'semi' ? 'Semicama' : 'Cama') + ')', price: money(legPrice(k, i)) })) }; });
     const tripSum = legs.filter(k => legTrip(k)).map(k => { const tr = legTrip(k); const w = SD.when(tr, stop); const ida = tr.dir === 'ida';
-      return { kind: q.rt ? (k === 'a' ? 'Ida' : 'Vuelta') : 'Solo ida', line: tr.lineName + ' · Coche N° ' + tr.car, from: ida ? stop : 'Salta (Terminal)', to: ida ? 'Salta (Terminal)' : stop,
+      return { kind: q.rt ? (k === 'a' ? 'Ida' : 'Vuelta') : 'Solo ida', line: tr.lineName, from: ida ? stop : 'Salta (Terminal)', to: ida ? 'Salta (Terminal)' : stop,
         date: w.dateLong, dep: w.time, arr: w.arr, note: w.note, hasNote: !!w.note, seats: (s.seats[k] || []).map(x => x.n).join(', '), short: (ida ? stop + ' → Salta' : 'Salta → ' + stop) + ' · ' + w.date + ' · ' + w.time + ' → ' + w.arr + ' hs' }; });
     const sum = { legs: sumLegs, rt: q.rt, rtRules: RT_RULES, policy: POLICY_ROWS.map(([when, pct]) => ({ when, pct })), baggage: BAGGAGE, total: money(total), hasSaving: saving > 0, saving: 'Ahorrás ' + money(saving) + ' comprando ida y vuelta', contact: [s.contact.email, s.contact.wa].filter(Boolean).join(' · ') };
     // mp
@@ -272,6 +270,8 @@ export default class Publico extends React.Component<any, any> {
         blocked: !gate.allowed, open: gate.allowed, blockedTitle: gate.reason === 'rt' ? 'Los pasajes ida y vuelta no admiten cambios' : 'Ya pasó el plazo para reprogramar',
         blockedText: gate.reason === 'rt' ? RT_RULES : 'Tu viaje sale en ' + Math.max(0, hrs) + ' h y el cambio solo se puede pedir hasta 3 h antes de la salida. Escribinos por WhatsApp y te ayudamos según disponibilidad.',
         policy: gate.free ? 'Como la empresa canceló tu viaje, la reprogramación no tiene cargo.' : 'Podés reprogramar hasta 3 h antes de la salida (te quedan ' + hrs + ' h). Retención: 10% con más de 48 h de anticipación, 20% entre 24 y 48 h y 30% dentro de las 24 h previas, más la diferencia si la nueva tarifa es mayor.',
+        rules: POLICY_ROWS.map((r, i) => ({ when: r[0], pct: gate.free ? 'Sin cargo' : 'Retención ' + r[1], bg: !gate.free && i === (hrs >= 48 ? 0 : hrs >= 24 ? 1 : 2) ? '#FDE6F2' : '#F8F5F6', fg: !gate.free && i === (hrs >= 48 ? 0 : hrs >= 24 ? 1 : 2) ? '#A3005A' : '#4A4447' })),
+        policyFoot: gate.free ? 'La empresa canceló este viaje: la reprogramación no tiene cargo.' : 'Tu viaje sale en ' + Math.max(0, hrs) + ' h. Podés reprogramar hasta 3 h antes de la salida, más la diferencia de tarifa si la hay.',
         steps: [1, 2, 3].map(n => n <= step ? '#E4007C' : '#EDE5E9'), step1: step === 1, step2: step === 2, step3: step === 3,
         days: days('a', rpDate, d => setRp({ date: d, tripId: null, seat: null }), SD.TODAY, curTrip2.dir, rpStop),
         trips: rpTrips.map(t => { const a = SD.avail(t), w = SD.when(t, rpStop); return { line: t.lineName, date: w.date, time: w.time, when: w.note, semi: 'Semicama: ' + a.semi, cama: 'Cama: ' + a.cama, disabled: a.total === 0, op: a.total === 0 ? .5 : 1, onPick: () => setRp({ tripId: t.id, seat: null, step: 2 }) }; }),
@@ -281,7 +281,7 @@ export default class Publico extends React.Component<any, any> {
         seatLabel: s.rp.seat ? 'Asiento ' + s.rp.seat.n + ' · ' + (s.rp.seat.cls === 'semi' ? 'Semicama' : 'Cama') : 'Elegí un asiento en el plano', noSeat: !s.rp.seat, nextBg: s.rp.seat ? 'linear-gradient(135deg,#C2006A,#E4007C)' : '#D9D1D5',
         toStep3: () => s.rp.seat && setRp({ step: 3 }),
         oldWhen: SD.when(curTrip2, rpStop).date + ' · ' + SD.when(curTrip2, rpStop).time + ' hs', oldSeat: 'Asiento ' + curT.seat + ' · ' + (curT.cls === 'semi' ? 'Semicama' : 'Cama'),
-        newWhen: nt ? SD.when(nt, rpStop).date + ' · ' + SD.when(nt, rpStop).time + ' hs' : '', newSeat: s.rp.seat ? 'Asiento ' + s.rp.seat.n + ' · ' + (s.rp.seat.cls === 'semi' ? 'Semicama' : 'Cama') + ' · Coche N° ' + nt.car : '',
+        newWhen: nt ? SD.when(nt, rpStop).date + ' · ' + SD.when(nt, rpStop).time + ' hs' : '', newSeat: s.rp.seat ? 'Asiento ' + s.rp.seat.n + ' · ' + (s.rp.seat.cls === 'semi' ? 'Semicama' : 'Cama') : '',
         feeLabel: quote && !quote.free ? 'Retención por reprogramación (' + quote.ret + '%)' : 'Retención por reprogramación', fee: quote ? money(quote.fee) : '', diff: quote ? money(quote.diff) : '', total: quote ? money(quote.total) : '',
         confirmLabel: s.paying ? 'Procesando…' : quote && quote.total > 0 ? 'Pagar ' + money(quote.total) + ' y confirmar' : 'Confirmar reprogramación',
         confirm: () => { if (s.paying) return; confirmAction({ title: '¿Confirmar el cambio de fecha?', body: 'Tu pasaje ' + curT.code + ' pasa al ' + SD.when(nt, rpStop).date + ' · ' + SD.when(nt, rpStop).time + ' hs, asiento ' + s.rp.seat.n + (quote && quote.total > 0 ? '. A pagar: ' + money(quote.total) : '') + '. El boleto anterior queda anulado.', confirmLabel: quote && quote.total > 0 ? 'Pagar y confirmar' : 'Confirmar cambio', cancelLabel: 'Volver' }).then(ok => { if (!ok) return; this.setState({ paying: true }); setTimeout(() => { const n = SD.reprogram(curT, s.rp.tripId, s.rp.seat, { channel: 'Online', branch: 'Web', user: 'Pasajero', reason: 'A pedido del pasajero' }); this.go('rpOk', { paying: false, rpDone: n.id }); }, 1100); }); } };
@@ -303,7 +303,7 @@ export default class Publico extends React.Component<any, any> {
         confirm: () => { if (!s.cxAck) return; const r = SD.cancelTicket(curT, { channel: 'Online', branch: 'Web', user: 'Pasajero' }); this.go('cxOk', { cxDone: { refund: money(r.refund), dest: curT.channel === 'Online' ? 'MercadoPago' : 'Sucursal' } }); } };
     }
     // contact
-    const branches = SD.BRANCHES.map((b, i) => Object.assign({}, b, { bd: i === s.branch ? '#E4007C' : '#F0E9ED', on: () => this.setState({ branch: i }), wa: e => { e.stopPropagation(); this.toast('Se abriría WhatsApp con ' + b.name + ' (' + b.tel + ')'); }, call: e => { e.stopPropagation(); this.toast('Llamando a ' + b.tel + '…'); } }));
+    const branches = SD.BRANCHES.map((b, i) => Object.assign({}, b, { bd: i === s.branch ? '#E4007C' : '#F0E9ED', on: () => this.setState({ branch: i }), wa: e => { e.stopPropagation(); this.toast('Se abriría WhatsApp con ' + b.name + ' (' + b.tel + ')'); } }));
     const faq = FAQ.map(([qq, a], i) => ({ q: qq, a, open: s.faq === i, icon: s.faq === i ? 'remove' : 'add', on: () => this.setState({ faq: s.faq === i ? -1 : i }) }));
     const flow = ['seats', 'datos', 'resumen', 'mp'];
     const screens = ['home', 'results', 'seats', 'datos', 'resumen', 'mp', 'ok', 'pendiente', 'rechazado', 'vencido', 'mis', 'detalle', 'rp', 'rpOk', 'cx', 'cxOk', 'contacto'];
@@ -316,7 +316,7 @@ export default class Publico extends React.Component<any, any> {
       toResumen: () => { const e = validate(); if (Object.keys(e).length) { this.setState({ errors: e, tried: true }); this.toast('Revisá los datos marcados en rojo'); return; } this.go('resumen', { errors: {}, tried: false }); },
       toMp: () => this.go('mp', { paying: false }),
       restart: () => { this.setState({ sel: { a: null, b: null }, seats: { a: [], b: [] }, leg: 'a' }); this.go('results'); this.load(); },
-      branches, branchSel: SD.BRANCHES[s.branch], faq, toast: s.toast,
+      branches, branchSel: SD.BRANCHES[s.branch], mapQuery: (b => (/confirmar/i.test(b.addr) ? '' : b.addr.replace('Terminal de Ómnibus, boleterías 07 y 13', 'Terminal de Ómnibus') + ', ') + (b.name === 'Salta Capital' ? 'Salta Capital' : b.name.replace(' y Urundel', '')) + ', Salta, Argentina')(SD.BRANCHES[s.branch]), faq, toast: s.toast,
       showFooter: !flow.includes(s.screen), showFab: !flow.includes(s.screen), fabBottom: 20
     };
   }
@@ -382,7 +382,7 @@ export default class Publico extends React.Component<any, any> {
       <div style={css("position:absolute;inset:0;background:linear-gradient(180deg,rgba(29,10,20,.25) 0%,rgba(110,0,58,.55) 55%,rgba(247,244,245,1) 100%)")}></div>
       <div style={css(`position:relative;max-width:1120px;margin:0 auto;padding:${$.heroPad ?? ''};display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:space-between`)}>
         <div style={css("flex:1 1 320px;min-width:0;color:#fff;display:flex;flex-direction:column;gap:10px;padding-bottom:8px")}>
-          <div style={css("align-self:flex-start;background:#E4007C;color:#fff;border-radius:999px;padding:6px 12px;font:700 12px 'Barlow',sans-serif;letter-spacing:.06em")}>LUNES A SÁBADO · SALIDAS DE MADRUGADA</div>
+          <div style={css("align-self:flex-start;background:#E4007C;color:#fff;border-radius:999px;padding:6px 12px;font:700 12px 'Barlow',sans-serif;letter-spacing:.06em")}>LUNES A SÁBADO</div>
           <h1 style={css(`margin:0;font:900 ${$.heroFs ?? ''}px/0.92 'Barlow Condensed',sans-serif;text-transform:uppercase;text-shadow:0 2px 24px rgba(0,0,0,.35);text-wrap:balance`)}>Pasajes a Salta desde Tartagal y Orán</h1>
           <div style={css(`font:400 ${$.scriptFs ?? ''}px/1.15 'Kaushan Script',cursive;text-shadow:0 2px 16px rgba(0,0,0,.4)`)}>Viajá cómodo, seguro y al mejor precio</div>
         </div>
@@ -515,6 +515,34 @@ export default class Publico extends React.Component<any, any> {
         </div>
       </section>
 
+      <section aria-labelledby="onco-title" style={css("display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));background:#fff;border-radius:24px;border:1px solid #F0E9ED;overflow:hidden")}>
+        <div style={css("padding:24px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,#FDF2F8 0%,#fff 70%)")}>
+          <div style={css("display:flex;flex-direction:column;gap:4px")}>
+            <div style={css("display:flex;align-items:center;gap:8px;font:700 12px 'Barlow',sans-serif;letter-spacing:.12em;color:#C2006A")}><span aria-hidden="true" style={css("font-family:'Material Symbols Rounded';font-size:20px")}>volunteer_activism</span>BENEFICIO SOLIDARIO</div>
+            <h2 id="onco-title" style={css("margin:0;font:800 32px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;text-wrap:balance")}>Pasajes gratuitos para pacientes oncológicos</h2>
+          </div>
+          <div style={css("font:400 22px/1.2 'Kaushan Script',cursive;color:#C2006A")}>Cada batalla es distinta, pero la lucha es de todos.</div>
+          <p style={css("margin:0;font:500 15px/1.55 'Barlow',sans-serif;color:#4A4447")}>Buscamos que la ayuda llegue a quienes realmente la necesitan por su situación económica. Ayudar al más necesitado es nuestro compromiso.</p>
+          <ol style={css("margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px")}>
+            <li style={css("display:flex;gap:12px;align-items:flex-start")}><span aria-hidden="true" style={css("flex:none;width:32px;height:32px;border-radius:50%;background:#C2006A;color:#fff;display:flex;align-items:center;justify-content:center;font:800 15px 'Barlow',sans-serif")}>1</span><span style={css("font:500 14.5px/1.45 'Barlow',sans-serif;color:#1D1A1C;padding-top:6px")}><strong>Hacé el trámite de manera presencial</strong> en la sucursal más cercana.</span></li>
+            <li style={css("display:flex;gap:12px;align-items:flex-start")}><span aria-hidden="true" style={css("flex:none;width:32px;height:32px;border-radius:50%;background:#C2006A;color:#fff;display:flex;align-items:center;justify-content:center;font:800 15px 'Barlow',sans-serif")}>2</span><span style={css("font:500 14.5px/1.45 'Barlow',sans-serif;color:#1D1A1C;padding-top:6px")}><strong>Solicitalo con 24 hs de anticipación</strong> al turno médico designado.</span></li>
+          </ol>
+        </div>
+        <div style={css("padding:24px;display:flex;flex-direction:column;gap:12px")}>
+          <h3 style={css("margin:0;font:800 20px 'Barlow Condensed',sans-serif;text-transform:uppercase")}>Documentación a presentar</h3>
+          <ul style={css("margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px")}>
+            {[['Historia clínica', 'Para acreditar el diagnóstico.'], ['Turno médico designado', 'Con la fecha de solicitud del viaje.'], ['Negativa de ANSES', ''], ['DNI del paciente', '']].map(([d, h]) => (
+              <li key={d} style={css("display:flex;gap:10px;align-items:flex-start")}><span aria-hidden="true" style={css("flex:none;width:24px;height:24px;border-radius:50%;background:#FDE6F2;color:#C2006A;display:flex;align-items:center;justify-content:center;font-family:'Material Symbols Rounded';font-size:18px")}>check</span><span style={css("display:flex;flex-direction:column")}><span style={css("font:700 15px 'Barlow',sans-serif;color:#1D1A1C")}>{d}</span>{h && <span style={css("font:500 13px 'Barlow',sans-serif;color:#716A6E")}>{h}</span>}</span></li>
+            ))}
+          </ul>
+          <div style={css("display:flex;gap:10px;align-items:flex-start;background:#F8F5F6;border-radius:12px;padding:12px;font:500 13.5px/1.45 'Barlow',sans-serif;color:#4A4447")}><span aria-hidden="true" style={css("font-family:'Material Symbols Rounded';font-size:20px;color:#716A6E")}>info</span><span>Este pasaje no se puede sacar por la web: lo emite el personal de la sucursal una vez verificada la documentación.</span></div>
+          <div style={css("display:flex;flex-wrap:wrap;gap:8px;margin-top:auto")}>
+            <button type="button" onClick={$.nav?.contacto} style={css("height:48px;padding:0 18px;border:none;border-radius:999px;background:linear-gradient(135deg,#C2006A,#E4007C);color:#fff;font:700 14px 'Barlow',sans-serif;cursor:pointer;display:flex;align-items:center;gap:8px")}><span aria-hidden="true" style={css("font-family:'Material Symbols Rounded';font-size:20px")}>storefront</span>Ver sucursales</button>
+            <button type="button" onClick={$.act?.wa} style={css("height:48px;padding:0 18px;border:1.5px solid #E2D9DE;border-radius:999px;background:#fff;color:#1D1A1C;font:700 14px 'Barlow',sans-serif;cursor:pointer")}>Consultar por WhatsApp</button>
+          </div>
+        </div>
+      </section>
+
       <section style={css("display:flex;flex-wrap:wrap;gap:20px;align-items:center;background:#fff;border-radius:24px;border:1px solid #F0E9ED;overflow:hidden")}>
         <div style={css("flex:1 1 280px;min-height:240px;align-self:stretch;background:url('/assets/salta.png') center/cover no-repeat")}></div>
         <div style={css("flex:1 1 300px;padding:24px;display:flex;flex-direction:column;gap:10px")}>
@@ -587,7 +615,6 @@ export default class Publico extends React.Component<any, any> {
                 <span style={css("background:#FDE6F2;color:#A3005A;border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif")}>{c?.line}</span>
                 {!!(c?.special) && (<><span style={css("background:#1D1A1C;color:#fff;border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif")}>Viaje especial</span></>)}
                 {!!(c?.few) && (<><span style={css("background:#E4007C;color:#fff;border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif")}>{c?.fewLabel}</span></>)}
-                <span style={css("margin-left:auto;font:600 12px 'Barlow',sans-serif;color:#6B6468")}>{c?.car}</span>
               </div>
               <div style={css("display:flex;align-items:center;gap:12px")}>
                 <div style={css("min-width:0")}>
@@ -649,9 +676,6 @@ export default class Publico extends React.Component<any, any> {
                 <div style={css("font:800 18px 'Barlow Condensed',sans-serif")}>{x?.price}</div>
               </div>
             </React.Fragment>))}
-            {!!($.seat?.cudNote) && (<>
-              <div style={css("background:#EAF1FD;color:#1F4E9E;border-radius:12px;padding:10px;font:500 12.5px/1.45 'Barlow',sans-serif")}>Elegiste un asiento reservado para pasajeros con discapacidad. Vas a tener que indicar el CUD en los datos del pasajero.</div>
-            </>)}
           </div>
         </div>
       </div>
@@ -710,10 +734,6 @@ export default class Publico extends React.Component<any, any> {
               </label>
             </React.Fragment>))}
           </div>
-          <button onClick={p?.toggleCud} style={css(`display:flex;gap:10px;align-items:flex-start;border:1.5px solid ${p?.cudBd ?? ''};background:${p?.cudBg ?? ''};border-radius:14px;padding:12px;cursor:pointer;text-align:left`)}>
-            <span style={css(`flex:none;width:22px;height:22px;border-radius:6px;border:2px solid #2E6BD8;background:${p?.cudBox ?? ''};color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Material Symbols Rounded';font-size:16px`)}>{p?.cudMark}</span>
-            <span style={css("display:flex;flex-direction:column;gap:3px")}><span style={css("font:700 14px 'Barlow',sans-serif;color:#1D1A1C")}>Viajo con Certificado Único de Discapacidad (CUD)</span><span style={css("font:500 12.5px/1.45 'Barlow',sans-serif;color:#4A4447")}>El pasaje del titular no tiene costo. Se valida en sucursal presentando el CUD original y el DNI antes de viajar; si no se valida, la reserva se libera.</span></span>
-          </button>
         </div>
       </React.Fragment>))}
       <div style={css("background:#fff;border-radius:20px;border:1px solid #F0E9ED;padding:16px;display:flex;flex-direction:column;gap:12px")}>
@@ -747,7 +767,7 @@ export default class Publico extends React.Component<any, any> {
       <div style={css("font:800 28px/1 'Barlow Condensed',sans-serif;text-transform:uppercase")}>Resumen de tu compra</div>
       {(Array.isArray($.sum?.legs) ? $.sum?.legs : []).map((l: any, $index: number) => (<React.Fragment key={$index}>
         <div style={css("background:#fff;border-radius:20px;border:1px solid #F0E9ED;padding:16px;display:flex;flex-direction:column;gap:10px")}>
-          <div style={css("display:flex;justify-content:space-between;gap:8px;align-items:center")}><span style={css("background:#E4007C;color:#fff;border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif")}>{l?.kind}</span><span style={css("font:600 12px 'Barlow',sans-serif;color:#6B6468")}>{l?.line} · {l?.car}</span></div>
+          <div style={css("display:flex;justify-content:space-between;gap:8px;align-items:center")}><span style={css("background:#E4007C;color:#fff;border-radius:999px;padding:4px 10px;font:700 12px 'Barlow',sans-serif")}>{l?.kind}</span><span style={css("font:600 12px 'Barlow',sans-serif;color:#6B6468")}>{l?.line}</span></div>
           <div style={css("font:800 22px/1.05 'Barlow Condensed',sans-serif;text-transform:uppercase")}>{l?.route}</div>
           <div style={css("font:600 14px/1.4 'Barlow',sans-serif")}>{l?.when}</div>
           <div style={css("display:flex;flex-direction:column;gap:6px;border-top:1px solid #F3EDF0;padding-top:10px")}>
@@ -963,8 +983,6 @@ export default class Publico extends React.Component<any, any> {
           <button onClick={$.act?.pdf} style={css("height:48px;border:none;border-radius:999px;background:#F1ECEF;color:#1D1A1C;font:700 14px 'Barlow',sans-serif;cursor:pointer")}>Descargar PDF</button>
           {!!($.det?.isRt) && (<div style={css("background:#FFF4DB;color:#8A5A00;border-radius:12px;padding:10px 12px;font:600 13px/1.45 'Barlow',sans-serif")}>{$.det?.rtRules}</div>)}
           {!!($.det?.credit) && (<div style={css("background:#FFF4DB;color:#8A5A00;border-radius:12px;padding:10px 12px;font:600 13px/1.45 'Barlow',sans-serif")}>Pagado con tarjeta de crédito: no admite devolución bajo ningún término. Podés reprogramarlo hasta 3 h antes de la salida.</div>)}
-          <div style={css("font:500 12.5px/1.5 'Barlow',sans-serif;color:#6B6468")}>Cancelación y reprogramación con retención del 10% (más de 48 h antes de la salida), 20% (entre 24 y 48 h) o 30% (dentro de las 24 h previas). Los cambios se piden hasta 3 h antes de la salida.</div>
-          <div style={css("font:500 12.5px/1.5 'Barlow',sans-serif;color:#6B6468")}><strong>Equipaje:</strong> {$.det?.baggage}</div>
         </div>
       </div>
     </div>
@@ -984,7 +1002,11 @@ export default class Publico extends React.Component<any, any> {
         </div>
       </>)}
       {!!($.rp?.open) && (<>
-        <div style={css("background:#FDF2F8;border:1px solid #F7CFE3;border-radius:16px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font:500 13.5px/1.5 'Barlow',sans-serif;color:#5C0033")}><span style={css("font-family:'Material Symbols Rounded';font-size:20px;color:#E4007C")}>policy</span><span>{$.rp?.policy}</span></div>
+        <div style={css("background:#fff;border-radius:18px;border:1px solid #F0E9ED;padding:16px;display:flex;flex-direction:column;gap:8px")}>
+          <div style={css("font:700 14px 'Barlow',sans-serif")}>Política de reprogramación</div>
+          {($.rp?.rules || []).map((r: any, k: number) => (<div key={k} style={css(`display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:10px;background:${r.bg};font:600 13.5px 'Barlow',sans-serif;color:${r.fg}`)}><span>{r.when}</span><span>{r.pct}</span></div>))}
+          <div style={css("font:500 12.5px 'Barlow',sans-serif;color:#6B6468")}>{$.rp?.policyFoot}</div>
+        </div>
         <div style={css("display:flex;gap:6px")}>
           {(Array.isArray($.rp?.steps) ? $.rp?.steps : []).map((x: any, $index: number) => (<React.Fragment key={$index}><div style={css(`flex:1;height:5px;border-radius:5px;background:${x ?? ''}`)}></div></React.Fragment>))}
         </div>
@@ -1115,17 +1137,13 @@ export default class Publico extends React.Component<any, any> {
               <div style={css("font:500 12px 'Barlow',sans-serif;color:#716A6E")}>{b?.hours}</div>
               <div style={css("display:flex;gap:6px;margin-top:2px")}>
                 <button onClick={b?.wa} style={css("height:40px;padding:0 12px;border:none;border-radius:999px;background:#E9FBF0;color:#147A3E;font:700 12.5px 'Barlow',sans-serif;cursor:pointer")}>WhatsApp</button>
-                <button onClick={b?.call} style={css("height:40px;padding:0 12px;border:none;border-radius:999px;background:#F1ECEF;color:#1D1A1C;font:700 12.5px 'Barlow',sans-serif;cursor:pointer")}>Llamar</button>
               </div>
             </div>
           </React.Fragment>))}
         </div>
         <div style={css("flex:1 1 320px;position:sticky;top:80px;display:flex;flex-direction:column;gap:8px")}>
-          <div style={css("height:300px;border-radius:20px;border:1px solid #E6DEE2;background:repeating-linear-gradient(135deg,#F3EEF1 0 12px,#ECE6E9 12px 24px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative")}>
-            <span style={css("width:44px;height:44px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#E4007C;box-shadow:0 8px 16px -6px rgba(228,0,124,.6)")}></span>
-            <span style={css("font:500 12px ui-monospace,Menlo,monospace;color:#6B6468;margin-top:10px")}>mapa · {$.branchSel?.name}</span>
-            <span style={css("font:500 12px ui-monospace,Menlo,monospace;color:#716A6E")}>{$.branchSel?.addr}</span>
-          </div>
+          <iframe key={$.mapQuery} title={'Mapa de la sucursal ' + ($.branchSel?.name || '')} src={'https://www.google.com/maps?q=' + encodeURIComponent($.mapQuery || '') + '&output=embed'} loading="lazy" referrerPolicy="no-referrer-when-downgrade" style={css("width:100%;height:300px;border:1px solid #E6DEE2;border-radius:20px;background:#F3EEF1")}></iframe>
+          <div style={css("display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font:600 13px 'Barlow',sans-serif;color:#4A4447")}><span>{$.branchSel?.name} · {$.branchSel?.addr}</span><a href={'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent($.mapQuery || '')} target="_blank" rel="noopener noreferrer" style={css("font:700 13px 'Barlow',sans-serif;color:#C2006A")}>Abrir en Google Maps</a></div>
         </div>
       </div>
       <div style={css("display:flex;flex-direction:column;gap:8px")}>
