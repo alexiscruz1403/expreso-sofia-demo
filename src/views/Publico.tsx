@@ -107,8 +107,8 @@ export default class Publico extends React.Component<any, any> {
       return { dow: SD.DOWS[dt.getDay()], day: dt.getDate(), tag: dis ? (i === 0 && legTrips(leg, d, dir).length && !stp ? 'Ya salió' : 'Sin servicio') : special ? 'Especial' : (i === 0 ? 'Hoy' : ''), disabled: !!dis, op: dis ? .45 : 1, cursor: dis ? 'not-allowed' : 'pointer',
         bg: isSel ? '#E4007C' : '#fff', fg: isSel ? '#fff' : '#1D1A1C', bd: isSel ? '#E4007C' : special ? '#1D1A1C' : '#EDE5E9', tagFg: isSel ? '#fff' : special ? '#1D1A1C' : '#716A6E', on: () => !dis && onPick(d) };
     });
-    const linesForStop = [T, O].filter(l => l.stops.some(x => x[0] === baseStop));
-    const stopChoices = Array.from(new Set([].concat(...linesForStop.map(l => l.stops.map(x => x[0])))));
+    // Always offer every stop of both lines; the trip list then shows the lines that serve the chosen one.
+    const stopChoices = allStops;
     const cardOf = (t, k) => {
       const a = SD.avail(t), w = SD.when(t, stop), soldOut = a.total === 0;
       const f = st.fares[t.line]; const blocked = t.cancelled || t.past || soldOut || t.blocked;
